@@ -107,7 +107,7 @@ func Reader (c []string, filename string) (bool) {
 		// temp
 		tstring string
 		tint int
-		tbool bool
+		//tbool bool
 		// loop
 		k string
 		i int
@@ -116,28 +116,18 @@ func Reader (c []string, filename string) (bool) {
 		l = len(c)
 		off = l-Win.LenY+1
 		ll []int
-		links = map[Pair]string{}
 
 		y = 0
 		x = 0
 		w = 0//window shift
 	)
 
-	//TODO(3) prelink -> enter link: remove link list, try links at runtime
 	for i=0;i<l;i++ {
 		tint = len(c[i])-1
 		if tint < 0 {
 			tint = 0
 		}
 		ll = append(ll, tint)
-		if strings.Index(c[i], "file:/")!=-1 {
-			tint = strings.Index(c[i], "file:/")
-			tstring = c[i][tint:]
-			if strings.Index(tstring, " ") != -1 {
-				tstring = tstring[:strings.Index(tstring, " ")]
-			}
-			links[Pair{i, tint}] = tstring
-		}
 	}
 
 	// div
@@ -172,13 +162,14 @@ func Reader (c []string, filename string) (bool) {
 				x = ll[y+w]
 			case ("enter"):
 				//TODO(1) link: get if link from line[x:]
-				tstring, tbool = links[Pair{y, x}]
-				if tbool {
+				tstring = c[y+w][x:]
+				tstring = strings.Split(tstring, " ")[0]
+				if fvalid(tstring) {
 					if fcan(tstring) {
-						if (fopen(tstring)) {
-							return true
-						}
-						ReaderClear()
+							if (fopen(tstring)) {
+								return true
+							}
+							ReaderClear()
 					} else {
 						ReaderWarn(0) // warn: no file from link
 					}
