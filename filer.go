@@ -124,7 +124,7 @@ func Reader (c []string, filename string) (bool) {
 
 	for i=0;i<l;i++ {
 		tint = len(c[i])-1
-		if tint < 0 {
+		if tint == -1 {
 			tint = 0
 		}
 		ll = append(ll, tint)
