@@ -80,6 +80,9 @@ func l( s string ) ( int ) {
 }
 
 func Reader (c []string, filename string) (bool) {
+	// set cursor type
+	print("\033[2 q") // block
+	//TODO tab: tabs on the files kinda break
 	var (
 		// temp
 		tstring string
@@ -208,33 +211,70 @@ func Reader (c []string, filename string) (bool) {
 					x--
 					tint=x
 				}
-			case ("a"):
+			case "a", "i":
+				if k == "i" {
+					x--
+				}
+				if x > l(c[w+y]) {
+					x = l(c[w+y])
+				}
 				mode = 1
+				// change cursor type
+				print("\033[6 q") // I-beam
+				x++
 				for k!="esc" {
+					// move cursor;get k
+					wmove(Win, y, x)
+					k = wgtk(Win)
+
+					// print airline
+					ReaderAirline(filename, k, y+w, x)
+					if len(k) == 1{
+						c[y+w] = c[y+w][:x]+k+c[y+w][x:]
+						x++
+					} else {
+						switch k {
+							case ("space"):
+								c[y+w] = c[y+w][:x]+" "+c[y+w][x:]
+								x++
+							case ("backspace"):
+								if len(c[y+w])!=0 {
+									c[y+w] = c[y+w][:x-1]+c[y+w][x:]
+									x--
+								}
+							case ("left"):
+								if x != 0 {
+									x--
+								}
+							case ("down"):
+							case ("up"):
+							case ("right"):
+								if x <= l(c[y+w]) {
+									x++
+								}
+						}
+					}
 					// clear;draw text
 					for i=0;(i+w)<cl&&(i<Win.LenY-2);i++{
 						wprint(Win, i, 0, "\033[2K")
 						wprint(Win, i, 0, c[i+w])
 					}
 
-					// print airline
-					ReaderAirline(filename, k, y+w, x)
-					if len(k) == 1{
-						c[y+w] = c[y+w][:x]+k+c[y+w][x:]
-					} else {
-
-					}
-
-					// move cursor;get k
-					wmove(Win, y, x)
-					k = wgtk(Win)
+				}
+				x--
+				if x == -1 {
+					x = 0
 				}
 
 				mode = 0
+				// change cursor type
+				print("\033[1 q") // block
 				//TODO insert mode
 		}
 	}
 	clear()
+	// reset cursor type
+	print("\033[1 q") // blink block
 	return true
 }
 
