@@ -48,14 +48,14 @@ func ClearAllAirLine() {
 // Airline
 func AirLine ( s string ) {
 	// make bkground color
-	wuprint(ALW, 0, 0, bk)
+	wuprint(ALW, 0, 0, bk+cleanslap)
 	// write
 	wuprint(ALW, 0, 0, s+txt)
 }
 
 func ClearAirLine() {
 	wuprint(
-		ALW, 1, 0, cleanslap,
+		ALW, 0, 0, cleanslap,
 	)
 }
 
