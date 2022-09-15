@@ -102,6 +102,11 @@ func Reader (c []string, filename string) (bool) {
 		w = 0//window shift
 	)
 
+	//TODO save: remember "  "->"\t" when saving
+	for i:=0;i<len(c);i++ {
+		c[i] = strings.Replace(c[i], "\t", "  ", -1)
+	}
+
 	if off < 0 {
 		off = 0
 	}
