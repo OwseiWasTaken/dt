@@ -9,6 +9,9 @@ include "airline"
 func main(){
 	InitTermin()
 
+	// set cursor type
+	print("\033[2 q") // blink block
+
 	InitVars()
 	InitFiler()
 	InitAirLine()
