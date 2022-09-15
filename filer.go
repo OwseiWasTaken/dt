@@ -71,6 +71,14 @@ func ClearAll () () {
 	ClearAllAirLine()
 }
 
+func l( s string ) ( int ) {
+	x:=len(s)
+	if x == 0 {
+		return 0
+	}
+	return x-1
+}
+
 func Reader (c []string, filename string) (bool) {
 	var (
 		// temp
@@ -82,8 +90,8 @@ func Reader (c []string, filename string) (bool) {
 		i int
 
 		// read
-		l = len(c)
-		off = l-Win.LenY+1
+		cl = len(c)
+		off = cl-Win.LenY+1
 		//ll []int
 
 		y = 0
@@ -91,13 +99,9 @@ func Reader (c []string, filename string) (bool) {
 		w = 0//window shift
 	)
 
-	//for i=0;i<l;i++ {
-	//	tint = len(c[i])-1
-	//	if tint == -1 {
-	//		tint = 0
-	//	}
-	//	ll = append(ll, tint)
-	//}
+	if off < 0 {
+		off = 0
+	}
 
 	// div
 	ClearAllAirLine()
@@ -106,8 +110,9 @@ func Reader (c []string, filename string) (bool) {
 	tint = 0
 
 	for k!="q" {
+		//TODO command: use ';' to use a command
 		// clear;draw text
-		for i=0;(i+w)<l&&(i<Win.LenY-2);i++{
+		for i=0;(i+w)<cl&&(i<Win.LenY-2);i++{
 			wprint(Win, i, 0, "\033[2K")
 			wprint(Win, i, 0, c[i+w])
 		}
@@ -122,7 +127,7 @@ func Reader (c []string, filename string) (bool) {
 		// use k
 		switch (k) {
 			case ("backspace"):
-				clear()
+				ClearAll()
 				return false
 			case ("space"):
 				ClearAllAirLine()
@@ -130,9 +135,8 @@ func Reader (c []string, filename string) (bool) {
 				x = 0
 			case ("$"):
 				//x = ll[y+w]
-				x = len(c[y+w])
+				x = l(c[y+w])
 			case ("enter"):
-				//TODO(1) link: get if link from line[x:]
 				tstring = c[y+w][x:]
 				tstring = strings.Split(tstring, " ")[0]
 				if fvalid(tstring) {
@@ -153,8 +157,12 @@ func Reader (c []string, filename string) (bool) {
 				x = 0
 			case ("G"):
 				w = off
-				y = Win.LenY-3
+				y = cl-w-1 // -1 for the y
+				if w != 0 {
+					y-- //-1 for the w
+				}
 				x = 0
+				tint = 0
 			case ("z"):
 				if off > w {
 					w++
@@ -164,12 +172,12 @@ func Reader (c []string, filename string) (bool) {
 					w--
 				}
 			case ("j"):
-				if y < Win.LenY-3 && (y+w+1) < l {
+				if y < Win.LenY-3 && (y+w+1) < cl {
 					y++
 					x = tint
 					//ll
-					if len(c[y+w]) < x {
-						x = len(c[y+w])
+					if l(c[y+w]) < x {
+						x = l(c[y+w])
 					}
 				} else {
 					if off > w {
@@ -180,8 +188,8 @@ func Reader (c []string, filename string) (bool) {
 				if y > 0 {
 					y--
 					x = tint
-					if len(c[y+w]) < x {
-						x = len(c[y+w])
+					if l(c[y+w]) < x {
+						x = l(c[y+w])
 					}// else if ll[y+w] >= x {
 					//	x = tint
 					//}
@@ -191,7 +199,7 @@ func Reader (c []string, filename string) (bool) {
 					}
 				}
 			case ("l"):
-				if x < len(c[y+w]) { // -1 no overhang
+				if x < l(c[y+w]) { // -1 no overhang
 					x++
 					tint=x
 				}
@@ -204,13 +212,18 @@ func Reader (c []string, filename string) (bool) {
 				mode = 1
 				for k!="esc" {
 					// clear;draw text
-					for i=0;(i+w)<l&&(i<Win.LenY-2);i++{
+					for i=0;(i+w)<cl&&(i<Win.LenY-2);i++{
 						wprint(Win, i, 0, "\033[2K")
 						wprint(Win, i, 0, c[i+w])
 					}
 
 					// print airline
 					ReaderAirline(filename, k, y+w, x)
+					if len(k) == 1{
+						c[y+w] = c[y+w][:x]+k+c[y+w][x:]
+					} else {
+
+					}
 
 					// move cursor;get k
 					wmove(Win, y, x)
@@ -221,6 +234,7 @@ func Reader (c []string, filename string) (bool) {
 				//TODO insert mode
 		}
 	}
+	clear()
 	return true
 }
 
