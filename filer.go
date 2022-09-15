@@ -55,13 +55,27 @@ func InitFiler() {
 
 // use airline
 func ReaderAirline (filename, k string, y, x int) {
+	ClearAirLine()
 	AirLine(
-		spf("%s %s %s@%s%d:%d %s",
+		spf("%s %s %s@%s%d:%d %s%s",
 		ModeText[mode],
 		bk, filename,
 		airline, y+1, x,
-		k,//9len = biggest wgtk ret
-	)+txt)
+		k,
+		txt,
+	))
+}
+
+func WriterAirline (filename, k string, y, x, tint int) {
+	ClearAirLine()
+	AirLine(
+		spf("%s %s %s@%s%d:%d::%d %s%s",
+		ModeText[mode],
+		bk, filename,
+		airline, y+1, x, tint,
+		k,
+		txt,
+	))
 }
 
 func ClearAll () () {
@@ -141,9 +155,10 @@ func Reader (c []string, filename string) (bool) {
 				ClearAllAirLine()
 			case ("_"):
 				x = 0
+				tint = x
 			case ("$"):
-				//x = ll[y+w]
 				x = l(c[y+w])
+				tint = x
 			case ("enter"):
 				tstring = c[y+w][x:]
 				tstring = strings.Split(tstring, " ")[0]
@@ -217,23 +232,25 @@ func Reader (c []string, filename string) (bool) {
 					tint=x
 				}
 			case "a", "i":
-				if k == "i" {
-					x--
+				if k == "a" {
+					x++
 				}
-				if x > l(c[w+y]) {
-					x = l(c[w+y])
+				if x > len(c[w+y]) {
+					x = len(c[w+y])
+				} else if x < 0 {
+					x = 0
 				}
 				mode = 1
 				// change cursor type
 				print("\033[6 q") // I-beam
-				x++
 				for k!="esc" {
+					// print airline
+					WriterAirline(filename, k, y+w, x, tint)
 					// move cursor;get k
 					wmove(Win, y, x)
+					//
 					k = wgtk(Win)
-
-					// print airline
-					ReaderAirline(filename, k, y+w, x)
+					//
 					if len(k) == 1{
 						c[y+w] = c[y+w][:x]+k+c[y+w][x:]
 						x++
@@ -250,12 +267,42 @@ func Reader (c []string, filename string) (bool) {
 							case ("left"):
 								if x != 0 {
 									x--
+									tint = x
+								}
+							case ("right"):
+								if x < len(c[y+w]) {
+									x++
+									tint = x
 								}
 							case ("down"):
+								if y == Win.LenY-3 {
+									if w < off {
+										w++
+									}
+								} else {
+									if y+1 < cl {
+										y++
+									}
+								}
+								if tint > x {
+									x = tint
+								}
+								if l(c[y+w]) < x {
+									x = len(c[y+w])
+								}
 							case ("up"):
-							case ("right"):
-								if x <= l(c[y+w]) {
-									x++
+								if y == 0 {
+									if w != 0 {
+										w--
+									}
+								} else {
+									y--
+								}
+								if tint > x {
+									x = tint
+								}
+								if l(c[y+w]) < x {
+									x = len(c[y+w])
 								}
 						}
 					}
