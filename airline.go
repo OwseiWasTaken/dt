@@ -17,11 +17,6 @@ var (
 )
 
 func InitAirLine () {
-	// define errors
-	ErrorText = []string{
-		BadError+"No file from link",
-		SimpleError+"Not a link",
-	}
 	// define colors
 	airline = colors["Airline"]
 	AirlineText = colors["AirLineText"]
@@ -31,6 +26,14 @@ func InitAirLine () {
 	cleanslap = txt+strings.Repeat(" ", Win.LenX)
 	bk = colors["BK"]
 	txt = colors["Text"]
+
+	// define errors
+	ErrorText = []string{
+		BadError+"No file from link",
+		SimpleError+"Not a link",
+		SimpleError+"Command Empty",
+		BadError+"No Such Command",
+	}
 
 	// make airline window
 	ALW = MakeWin(
@@ -54,9 +57,7 @@ func AirLine ( s string ) {
 }
 
 func ClearAirLine() {
-	wuprint(
-		ALW, 0, 0, cleanslap,
-	)
+	AirLine(cleanslap)
 }
 
 // warn
@@ -66,7 +67,6 @@ func Warn(warntype int) {
 }
 
 func ClearWarn () {
-	AirLine(cleanslap)
 	ErrorLine(slap)
 }
 
