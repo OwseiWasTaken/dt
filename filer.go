@@ -34,17 +34,13 @@ func fopen (f string) (bool) {
 
 //READER
 
-type Pair struct {
-	y int
-	x int
-}
-
 //init vars
 var (
 	ModeText [2]string
 	mode = 0
 )
 
+// vars.go -> local vars
 func InitFiler() {
 	// define colors
 	ModeText = [...]string{
@@ -101,11 +97,12 @@ func Reader (c []string, filename string) (bool) {
 		// temp
 		tstring string
 		tint int
-		//tbool bool
+		tbool bool
 		// loop
 		k string
 		i int
 
+		cmd string
 		// read
 		cl = len(c)
 		off = cl-Win.LenY+1
@@ -148,6 +145,66 @@ func Reader (c []string, filename string) (bool) {
 
 		// use k
 		switch (k) {
+			case (":"):
+				// change cursor type
+				print("\033[6 q") // I-beam
+				ClearWarn()
+				wmove(Win, ALW.MinY+1, 0)
+				tstring = ":"
+				for {
+					ErrorLine(tstring)
+					k = wgtk(Win)
+					if len(k) == 1 {
+						tstring += k
+					} else if k == "backspace" && len(tstring) != 0 {
+						tstring = tstring[:len(tstring)-1]
+					} else if k == "space" {
+						tstring += " "
+					} else if k == "enter" {
+						break
+					}
+					// remove ':'
+					if len(tstring) == 0 {
+						break
+					}
+				}
+				if len(tstring) != 0 {
+
+					cl := strings.Split(tstring, " ")
+					if len(cl) == 0 {
+						Warn(2)// Empty
+					}
+
+					if len(cl) > 1 {
+						cmd = cl[0]
+						cl = cl[1:]
+					} else {
+						cmd = cl[0]
+						cl = []string{}
+					}
+
+					tbool = false
+					switch cmd {
+						case (":w"):
+							WriteFile(filename, strings.Join(c, "\n"))
+							//if len(cl)
+						case (":q"):
+							clear()
+							// reset cursor type
+							print("\033[1 q") // blink block
+							return true
+						default:
+							tbool = true
+					}
+					if tbool {
+						ErrorLine(ErrorText[3]+" '"+tstring+"'"+txt)
+					} else {
+						ErrorLine(tstring)
+					}
+					tstring = ""
+				}
+				// set cursor type
+				print("\033[2 q") // block
 			case ("backspace"):
 				ClearAll()
 				return false
