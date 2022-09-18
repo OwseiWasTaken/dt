@@ -1,4 +1,4 @@
-# name:(f)r,g,b (b)r,g,b
+# name:(f)r,g,b,(b)r,g,b
 # name:(f)r,g,b
 # name:name
 
@@ -12,7 +12,7 @@ nc:white
 clear:0,0,0,0,0,0
 
 # background
-
+bkgrey:0,0,0,35,35,35
 
 # complex colors
 White:255,255,255,0,0,0
@@ -32,3 +32,13 @@ AirLine:0,0,0,110,110,110
 
 BadError:215,215,215,255,0,0
 SimpleError:015,015,015,255,255,50
+
+# Folder
+
+FileColor:165,205,0
+FolderColor:255,255,255
+HiddenFileColor:30,30,30
+
+# file
+.txt:200,200,200
+.py:0,255,0

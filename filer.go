@@ -42,12 +42,21 @@ func fopen (f string) (bool) {
 //init vars
 var (
 	ModeText [3]string
+	bkgrey string
+	FileColor string
+	FolderColor string
+	HiddenFileColor string
+
 	mode = 0
 )
 
-// vars.go -> local vars
+// config file -> vars
 func InitFiler() {
 	// define colors
+	bkgrey = colors["bkgrey"]
+	FileColor = colors["FileColor"]
+	FolderColor = colors["FolderColor"]
+	HiddenFileColor = colors["HiddenFileColor"]
 	ModeText = [...]string{
 		colors["NormalMode"]+" NORMAL",
 		colors["InsertMode"]+" INSERT",
@@ -152,7 +161,7 @@ func Reader (c []string, filename string) (bool) {
 		//TODO command: use ';' to use a command
 		// clear;draw text
 		for i=0;(i+w)<cl&&(i<Win.LenY-2);i++{
-			wprint(Win, i, 0, "\033[2K")
+			wprint(Win, i, 0, "\033[2K"+bkgrey)
 			wprint(Win, i, 0, c[i+w])
 		}
 
@@ -420,22 +429,43 @@ func Reader (c []string, filename string) (bool) {
 	return true
 }
 
-// Reader out doesn't matter
+// Reader out doesn't matter (when Folder().Reader())
 //FOLDER
 func Folder ( folder string ) () {
 	// dir mode
 	mode = 2
 	FolderAirline(folder, "no git yet")
 
-	dirs := flist(folder)
+	var (
+		dirs []string
+		ti = 0
+		//y int
+	)
+
+	dirs = flist(folder)
+	ErrorLine(bkgrey)
+	for i:=0;i<Win.LenY-2;i++{
+		wprint(Win, i, 0, "\033[2K"+bkgrey)
+	}
 	for i:=0;i<len(dirs);i++ {
-		wprint(Win, i, 0, dirs[i])
+		if dirs[i][0] == '.' {
+			continue
+			//wuprint(Win, i, 0, HiddenFileColor)
+		}
+		if ( dirs[i][len(dirs[i])-1] == '/' ) {
+			wuprint(Win, ti, 0, FolderColor)
+		} else {
+			wuprint(Win, ti, 0, FileColor)
+		}
+		wprint(Win, ti, 0, dirs[i])
+		ti++
 	}
 
 	wmove(Win, 0,0)
 	wgtk(Win)
 }
 
+//TODO(4) git: get gs.go's info
 func FolderAirline ( dir string, git string ) () {
 	ClearAirLine()
 	AirLine( spf(
