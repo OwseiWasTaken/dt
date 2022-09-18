@@ -18,8 +18,7 @@ var (
 
 func InitAirLine () {
 	// define colors
-	airline = colors["Airline"]
-	AirlineText = colors["AirLineText"]
+	airline = colors["AirLine"]
 	BadError = colors["BadError"]
 	SimpleError = colors["SimpleError"]
 	slap = bk+strings.Repeat(" ", Win.LenX)+txt
