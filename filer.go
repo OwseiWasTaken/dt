@@ -89,10 +89,23 @@ func l( s string ) ( int ) {
 	return x-1
 }
 
+func retab ( l string ) ( string ) {
+	for i:=0; len(l)-1 > i && (l[i]==' ') && (l[i+1] == ' ');i++ {
+		l = strings.Replace(l, "  ", "\t", 1)
+	}
+	return l
+}
+
+func untab ( l string ) ( string ) {
+	for i:=0; len(l) > i && (l[i]=='	');i+=2 {
+		l = strings.Replace(l, "\t", "  ", 1)
+	}
+	return l
+}
+
 func Reader (c []string, filename string) (bool) {
 	// set cursor type
 	print("\033[2 q") // block
-	//TODO tab: tabs on the files kinda break
 	var (
 		// temp
 		tstring string
@@ -113,9 +126,8 @@ func Reader (c []string, filename string) (bool) {
 		w = 0//window shift
 	)
 
-	//TODO save: remember "  "->"\t" when saving
 	for i:=0;i<len(c);i++ {
-		c[i] = strings.Replace(c[i], "\t", "  ", -1)
+		c[i] = untab(c[i])
 	}
 
 	if off < 0 {
@@ -145,6 +157,13 @@ func Reader (c []string, filename string) (bool) {
 
 		// use k
 		switch (k) {
+			//help
+			case ("e"):
+				tint = strings.Index(c[w+y][x:], " ")-1
+				x = tint
+			case ("w"):
+				tint = strings.Index(c[w+y][x:], " ")+1
+			//help
 			case (":"):
 				// change cursor type
 				print("\033[6 q") // I-beam
@@ -186,8 +205,9 @@ func Reader (c []string, filename string) (bool) {
 					tbool = false
 					switch cmd {
 						case (":w"):
-							WriteFile(filename, strings.Join(c, "\n"))
-							//if len(cl)
+							//save
+							// retab
+							WriteFile(filename, retab(strings.Join(c, "\n")))
 						case (":q"):
 							clear()
 							// reset cursor type
@@ -361,6 +381,9 @@ func Reader (c []string, filename string) (bool) {
 								if l(c[y+w]) < x {
 									x = len(c[y+w])
 								}
+							case ("tab"):
+								c[y+w] = c[y+w][:x]+"  "+c[y+w][x:]
+								x+=2
 						}
 					}
 					// clear;draw text
@@ -387,7 +410,12 @@ func Reader (c []string, filename string) (bool) {
 	return true
 }
 
+//FOLDER
+
+
+//HTTP?
 // https links
 func lvalid (f string) (bool) {
 	return strings.Index(f, "https:/")==0
 }
+
