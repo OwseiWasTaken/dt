@@ -16,7 +16,7 @@ func main(){
 	InitFiler()
 	InitAirLine()
 
-	fopen("file://home/ow/70lines.txt")
+	Folder("file://home/ow/")
 
 	StopTermin()
 	exit(0)

@@ -19,6 +19,10 @@ func fcan (f string) (bool) {
 	return fvalid(f) && fexists(f)
 }
 
+func flist (f string) ([]string) {
+	return ls(f[6:])
+}
+
 func fload (f string) ([]string) {
 	if fcan(f) {
 		return strings.Split(ReadFile(f[6:]), "\n")
@@ -28,6 +32,7 @@ func fload (f string) ([]string) {
 	}
 }
 
+//TODO fopen check dir or file
 func fopen (f string) (bool) {
 	return Reader(fload(f), f[6:])
 }
@@ -36,7 +41,7 @@ func fopen (f string) (bool) {
 
 //init vars
 var (
-	ModeText [2]string
+	ModeText [3]string
 	mode = 0
 )
 
@@ -46,6 +51,7 @@ func InitFiler() {
 	ModeText = [...]string{
 		colors["NormalMode"]+" NORMAL",
 		colors["InsertMode"]+" INSERT",
+		colors["NewTree"]+" NEWTREE ",
 	}
 }
 
@@ -104,6 +110,8 @@ func untab ( l string ) ( string ) {
 }
 
 func Reader (c []string, filename string) (bool) {
+	// normal mode
+	mode = 0
 	// set cursor type
 	print("\033[2 q") // block
 	var (
@@ -317,6 +325,7 @@ func Reader (c []string, filename string) (bool) {
 				} else if x < 0 {
 					x = 0
 				}
+				// insert mode
 				mode = 1
 				// change cursor type
 				print("\033[6 q") // I-beam
@@ -398,6 +407,7 @@ func Reader (c []string, filename string) (bool) {
 					x = 0
 				}
 
+				// normal mode
 				mode = 0
 				// change cursor type
 				print("\033[1 q") // block
@@ -410,7 +420,29 @@ func Reader (c []string, filename string) (bool) {
 	return true
 }
 
+// Reader out doesn't matter
 //FOLDER
+func Folder ( folder string ) () {
+	// dir mode
+	mode = 2
+	FolderAirline(folder, "no git yet")
+
+	dirs := flist(folder)
+	for i:=0;i<len(dirs);i++ {
+		wprint(Win, i, 0, dirs[i])
+	}
+
+	wmove(Win, 0,0)
+	wgtk(Win)
+}
+
+func FolderAirline ( dir string, git string ) () {
+	ClearAirLine()
+	AirLine( spf(
+		"%s%s %s%s",
+		ModeText[mode], airline, dir, git,
+	))
+}
 
 
 //HTTP?
