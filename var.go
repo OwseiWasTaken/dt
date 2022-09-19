@@ -1,6 +1,3 @@
-type _cfg struct {
-	vars map[string]string
-}
 
 const (
 	dir = "./config/"
@@ -10,14 +7,16 @@ const (
 
 //init vars
 var (
-	cfg = _cfg{map[string]string{}}
+	cfg = map[string]string{}
 	colors = map[string]string{}
 	FileColors = map[string]string{}
+	sws string
 )
 
 func InitVars () {
-	cfg.vars["flname"] = dir+file
-	cfg.vars["colordir"] = colordir
+	cfg["flname"] = dir+file
+	cfg["colordir"] = colordir
+	sws = strings.Repeat(" ", Win.LenX)
 	load(dir+file)
 }
 
@@ -28,15 +27,20 @@ func load (f string) () {
 		line = file[i]
 		if len(line) < 2{continue}
 		value := line[strings.Index(line, ":")+1:]
+		name := line[:strings.Index(line, ":")]
+		// oh my, after 750 lines, python would be useful for the first time!
+		PS(name)
+		wgtk(Win)
 		switch (i){
 			case 0:
-				cfg.vars["colorfile"] = value[1:len(value)-1]
+				cfg["colorfile"] = value[1:len(value)-1]
 		}
 	}
-	LoadColors(cfg.vars["colorfile"])
+	LoadColors(cfg["colorfile"])
 }
 
 func InterpretColorLine ( line string ) ( string, string ) {
+	line = strings.Replace(line, " ", "", -1)
 	var ll = strings.Split(line, ":")
 	var name = ""
 	var code = ""
@@ -55,7 +59,7 @@ func InterpretColorLine ( line string ) ( string, string ) {
 }
 
 func LoadColors ( f string ) ( ) {
-	var fl = strings.Split(ReadFile(cfg.vars["colordir"]+f+".clrs"), "\n")
+	var fl = strings.Split(ReadFile(cfg["colordir"]+f+".clrs"), "\n")
 	var line string
 	var cutoff int
 	var name string
@@ -80,7 +84,7 @@ func LoadColors ( f string ) ( ) {
 	}
 }
 
-func save(cfg _cfg) (bool) {
+func save(cfg map[string]string) (bool) {
 	// TODO
 	return true
 }

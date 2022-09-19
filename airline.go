@@ -21,8 +21,8 @@ func InitAirLine () {
 	airline = colors["AirLine"]
 	BadError = colors["BadError"]
 	SimpleError = colors["SimpleError"]
-	slap = bk+strings.Repeat(" ", Win.LenX)+txt
-	cleanslap = txt+strings.Repeat(" ", Win.LenX)
+	slap = bk+sws+txt
+	cleanslap = txt+sws
 	bk = colors["BK"]
 	txt = colors["Text"]
 
