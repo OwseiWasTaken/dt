@@ -35,7 +35,7 @@ SimpleError:015,015,015,255,255,50
 
 # Folder
 
-# no .X
+# no .X & dir
 FileColor:130,130,130
 FolderColor:105,105,200
 HiddenFileColor:30,30,30
