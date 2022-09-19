@@ -1,7 +1,5 @@
 type _cfg struct {
-	flname string
-	colordir string
-	colorfile string
+	vars map[string]string
 }
 
 const (
@@ -12,18 +10,19 @@ const (
 
 //init vars
 var (
-	cfg = _cfg{file, colordir, ""}
+	cfg = _cfg{map[string]string{}}
 	colors = map[string]string{}
+	FileColors = map[string]string{}
 )
 
 func InitVars () {
-	clear()
+	cfg.vars["flname"] = dir+file
+	cfg.vars["colordir"] = colordir
 	load(dir+file)
 }
 
 func load (f string) () {
 	file := strings.Split(ReadFile(f), "\n")
-	cfg.flname = f
 	line := ""
 	for i:=0;i<len(file);i++ {
 		line = file[i]
@@ -31,10 +30,10 @@ func load (f string) () {
 		value := line[strings.Index(line, ":")+1:]
 		switch (i){
 			case 0:
-				cfg.colorfile=value[1:len(value)-1]
+				cfg.vars["colorfile"] = value[1:len(value)-1]
 		}
 	}
-	LoadColors(cfg.colorfile)
+	LoadColors(cfg.vars["colorfile"])
 }
 
 func InterpretColorLine ( line string ) ( string, string ) {
@@ -56,7 +55,7 @@ func InterpretColorLine ( line string ) ( string, string ) {
 }
 
 func LoadColors ( f string ) ( ) {
-	var fl = strings.Split(ReadFile(cfg.colordir+f+".clrs"), "\n")
+	var fl = strings.Split(ReadFile(cfg.vars["colordir"]+f+".clrs"), "\n")
 	var line string
 	var cutoff int
 	var name string
@@ -68,7 +67,12 @@ func LoadColors ( f string ) ( ) {
 			line = line[:cutoff]
 		}
 		if len(line) < 3 {continue}
-		if line[0] != '#' {
+
+		if line[0] == '.' {
+			name, code = InterpretColorLine(line)
+			if len(name) == 0 || len(code) == 0 {continue}
+			FileColors[name] = code
+		} else if line[0] != '#' {
 			name, code = InterpretColorLine(line)
 			if len(name) == 0 || len(code) == 0 {continue}
 			colors[name] = code
