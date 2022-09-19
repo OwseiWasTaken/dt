@@ -9,14 +9,15 @@ include "airline"
 func main(){
 	InitTermin()
 
-	// set cursor type
-	print("\033[2 q") // blink block
-
 	InitVars()
 	InitFiler()
 	InitAirLine()
 
-	Folder("file://home/ow/")
+	// set cursor type
+	print("\033[2 q") // blink block
+
+	Folder("file://home/ow/code/py")
+	Folder("file://home/ow/code/golang")
 
 	StopTermin()
 	exit(0)
