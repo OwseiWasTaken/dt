@@ -35,10 +35,15 @@ SimpleError:015,015,015,255,255,50
 
 # Folder
 
-FileColor:165,205,0
-FolderColor:255,255,255
+# no .X
+FileColor:130,130,130
+FolderColor:105,105,200
 HiddenFileColor:30,30,30
 
+# green: 165,205,0
+
 # file
-.txt:200,200,200
-.py:0,255,0
+.txt:255,255,255
+.py:255,255,0
+.zip:200,20,250
+.go:180,200,255
