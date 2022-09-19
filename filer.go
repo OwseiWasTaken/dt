@@ -47,6 +47,12 @@ var (
 	FolderColor string
 	HiddenFileColor string
 
+	// temp
+	tstring string
+	tint int
+	tbool bool
+	terror error
+
 	mode = 0
 )
 
@@ -124,10 +130,6 @@ func Reader (c []string, filename string) (bool) {
 	// set cursor type
 	print("\033[2 q") // block
 	var (
-		// temp
-		tstring string
-		tint int
-		tbool bool
 		// loop
 		k string
 		i int
@@ -434,6 +436,8 @@ func Reader (c []string, filename string) (bool) {
 func Folder ( folder string ) () {
 	// dir mode
 	mode = 2
+	// set cursor type
+	print("\033[2 q") // block
 	FolderAirline(folder, "no git yet")
 
 	var (
@@ -453,9 +457,15 @@ func Folder ( folder string ) () {
 			//wuprint(Win, i, 0, HiddenFileColor)
 		}
 		if ( dirs[i][len(dirs[i])-1] == '/' ) {
-			wuprint(Win, ti, 0, FolderColor)
+			wColor(FolderColor)
 		} else {
-			wuprint(Win, ti, 0, FileColor)
+			wColor(FileColor)
+		}
+		if tint = strings.Index(dirs[i], "."); tint != -1 {
+			tstring = dirs[i][strings.Index(dirs[i], "."):]
+			if tstring, tbool = FileColors[tstring]; tbool {
+				wColor(tstring)
+			}
 		}
 		wprint(Win, ti, 0, dirs[i])
 		ti++
