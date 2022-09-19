@@ -430,6 +430,8 @@ func Reader (c []string, filename string) (bool) {
 	print("\033[1 q") // blink block
 	return true
 }
+//TODO (1): vars.screenwide"
+//TODO (2): bkgrey into ErrorLine
 
 // Reader out doesn't matter (when Folder().Reader())
 //FOLDER
