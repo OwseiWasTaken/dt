@@ -1,4 +1,4 @@
-type cfg struct {
+type _cfg struct {
 	flname string
 	colordir string
 	colorfile string
@@ -12,8 +12,7 @@ const (
 
 //init vars
 var (
-	c = cfg{file, colordir, ""}
-	Colors = map[string]string{}
+	cfg = _cfg{file, colordir, ""}
 	colors = map[string]string{}
 )
 
@@ -24,7 +23,7 @@ func InitVars () {
 
 func load (f string) () {
 	file := strings.Split(ReadFile(f), "\n")
-	c.flname = f
+	cfg.flname = f
 	line := ""
 	for i:=0;i<len(file);i++ {
 		line = file[i]
@@ -32,10 +31,10 @@ func load (f string) () {
 		value := line[strings.Index(line, ":")+1:]
 		switch (i){
 			case 0:
-				c.colorfile=value[1:len(value)-1]
+				cfg.colorfile=value[1:len(value)-1]
 		}
 	}
-	LoadColors(c.colorfile)
+	LoadColors(cfg.colorfile)
 }
 
 func InterpretColorLine ( line string ) ( string, string ) {
@@ -57,7 +56,7 @@ func InterpretColorLine ( line string ) ( string, string ) {
 }
 
 func LoadColors ( f string ) ( ) {
-	var fl = strings.Split(ReadFile(c.colordir+f+".clrs"), "\n")
+	var fl = strings.Split(ReadFile(cfg.colordir+f+".clrs"), "\n")
 	var line string
 	var cutoff int
 	var name string
@@ -77,7 +76,7 @@ func LoadColors ( f string ) ( ) {
 	}
 }
 
-func save(c cfg) (bool) {
+func save(cfg _cfg) (bool) {
 	// TODO
 	return true
 }
