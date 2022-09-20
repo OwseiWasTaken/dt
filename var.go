@@ -11,7 +11,32 @@ var (
 	colors = map[string]string{}
 	FileColors = map[string]string{}
 	sws string
+	used = []
 )
+
+// run after Init
+func debug () () {
+	//vars
+	for i:=0;i<Win.LenY-2;i++{
+		wprint(Win, i, 0, "\033[2K")
+	}
+	i:=0
+	for key, val := range cfg {
+		wprint(Win, i, 0, spf("%s:%s", key, val))
+		i++
+	}
+	wgtk(Win)
+	for i:=0;i<Win.LenY-2;i++{
+		wprint(Win, i, 0, "\033[2K")
+	}
+	//colors
+	// add FileColors?
+	i=0
+	for key, val := range colors {
+		wprint(Win, i, 0, spf("%s:%s████   %s", key, val, colors["nc"]))
+		i++
+	}
+}
 
 func InitVars () {
 	cfg["flname"] = dir+file
@@ -29,12 +54,7 @@ func load (f string) () {
 		value := line[strings.Index(line, ":")+1:]
 		name := line[:strings.Index(line, ":")]
 		// oh my, after 750 lines, python would be useful for the first time!
-		PS(name)
-		wgtk(Win)
-		switch (i){
-			case 0:
-				cfg["colorfile"] = value[1:len(value)-1]
-		}
+		cfg[name] = value[1:len(value)-1]
 	}
 	LoadColors(cfg["colorfile"])
 }
