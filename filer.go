@@ -100,6 +100,7 @@ func ClearAll () () {
 		wprint(Win, i, 0, "\033[2K")
 	}
 	ClearAllAirLine()
+	ErrorLine(bkgrey+sws)
 }
 
 func l( s string ) ( int ) {
@@ -477,11 +478,12 @@ func Folder ( folder string ) () {
 }
 
 //TODO(4) git: get gs.go's info
+//TODO(1) debug: debug display colors FG/BK
 func FolderAirline ( dir string, git string ) () {
-	ClearAirLine()
+	ClearAll()
 	AirLine( spf(
 		"%s%s %s%s",
-		ModeText[mode], airline, dir, git,
+		ModeText[mode], AirlineText, dir, git,
 	))
 }
 
