@@ -10,6 +10,7 @@ var (
 	cleanslap string
 	bk string
 	txt string
+	airlinetxt string
 
 	ErrorText []string
 
@@ -21,10 +22,11 @@ func InitAirLine () {
 	airline = colors["AirLine"]
 	BadError = colors["BadError"]
 	SimpleError = colors["SimpleError"]
+	txt = colors["Text"]
+	AirlineText = colors["AirlineText"]
+	bk = colors["AirlineText"]
 	slap = bk+sws+txt
 	cleanslap = txt+sws
-	bk = colors["BK"]
-	txt = colors["Text"]
 
 	// define errors
 	ErrorText = []string{
@@ -52,7 +54,7 @@ func AirLine ( s string ) {
 	// make bkground color
 	wuprint(ALW, 0, 0, bk+cleanslap)
 	// write
-	wuprint(ALW, 0, 0, s+txt)
+	wuprint(ALW, 0, 0, s)
 }
 
 func ClearAirLine() {
@@ -70,6 +72,6 @@ func ClearWarn () {
 }
 
 func ErrorLine ( s string ) {
-	wprint(ALW, 1, 0, s)
+	wuprint(ALW, 1, 0, s)
 }
 
