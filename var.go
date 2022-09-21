@@ -8,10 +8,9 @@ const (
 //init vars
 var (
 	cfg = map[string]string{}
-	colors = map[string]string{}
 	FileColors = map[string]string{}
+	colors = map[string]string{}
 	sws string
-	used = []
 )
 
 // run after Init
@@ -26,7 +25,7 @@ func debug () () {
 		i++
 	}
 	wgtk(Win)
-	for i:=0;i<Win.LenY-2;i++{
+	for i=0;i<Win.LenY-2;i++{
 		wprint(Win, i, 0, "\033[2K")
 	}
 	//colors
@@ -53,8 +52,7 @@ func load (f string) () {
 		if len(line) < 2{continue}
 		value := line[strings.Index(line, ":")+1:]
 		name := line[:strings.Index(line, ":")]
-		// oh my, after 750 lines, python would be useful for the first time!
-		cfg[name] = value[1:len(value)-1]
+		cfg[name] = value
 	}
 	LoadColors(cfg["colorfile"])
 }
