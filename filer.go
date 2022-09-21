@@ -490,9 +490,9 @@ func Folder ( folder string ) () {
 		}
 	}
 
+	// TODO(4): get folder name from spwd
+	FolderAirline(folder, GetGs(folder[6:]))
 	wmove(Win, y, 0)
-	//TODO(4) git: get gs.go's info
-	FolderAirline(folder, "(no git yet)")
 	wgtk(Win)
 }
 
