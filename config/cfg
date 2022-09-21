@@ -1,2 +1,5 @@
-colorfile:"default"
+colorfile:default
+ShowHiddenFiles:false
+ShowDirs:true
+ShowFiles:true
 
