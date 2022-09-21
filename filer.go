@@ -64,19 +64,36 @@ func InitFiler() {
 	FolderColor = colors["FolderColor"]
 	HiddenFileColor = colors["HiddenFileColor"]
 	ModeText = [...]string{
-		colors["NormalMode"]+" NORMAL",
-		colors["InsertMode"]+" INSERT",
-		colors["NewTree"]+" NEWTREE ",
+		colors["NormalMode"]+" NORMAL  "+AirlineText,
+		colors["InsertMode"]+" INSERT "+AirlineText,
+		colors["NewTree"]+" NEWTREE "+AirlineText,
 	}
 }
 
 // use airline
-func ReaderAirline (filename, k string, y, x int) {
+//func ReaderAirline (filename, k string, y, x int) {
+//	ClearAirLine()
+//	AirLine(
+//		spf("%s %s %s@%s%d:%d %s%s",
+//		ModeText[mode],
+//		bk, filename,
+//		airline, y+1, x,
+//		k,
+//		txt,
+//	))
+//}
+
+func MakeAirLine (s string) {
 	ClearAirLine()
 	AirLine(
-		spf("%s %s %s@%s%d:%d %s%s",
-		ModeText[mode],
-		bk, filename,
+		ModeText[mode]+s,
+	)
+}
+
+func ReaderAirline (filename, k string, y, x int) {
+	MakeAirLine( spf(
+		"%s%s@%s%d:%d %s%s",
+		filename,
 		airline, y+1, x,
 		k,
 		txt,
@@ -84,14 +101,19 @@ func ReaderAirline (filename, k string, y, x int) {
 }
 
 func WriterAirline (filename, k string, y, x, tint int) {
-	ClearAirLine()
-	AirLine(
-		spf("%s %s %s@%s%d:%d::%d %s%s",
-		ModeText[mode],
+	MakeAirLine( spf(
+		"%s%s@%s%d:%d::%d %s%s",
 		bk, filename,
 		airline, y+1, x, tint,
 		k,
 		txt,
+	))
+}
+
+func FolderAirline ( dir string, git string ) () {
+	MakeAirLine( spf(
+		"%s %s %s",
+		AirlineText, dir, git,
 	))
 }
 
@@ -443,50 +465,84 @@ func Folder ( folder string ) () {
 	FolderAirline(folder, "no git yet")
 
 	var (
-		dirs []string
-		ti = 0
-		//y int
+		dir []string
+		ShowHiddenFiles bool
+		ShowFiles bool
+		ShowDirs bool
+		y = 0
 	)
+	ShowHiddenFiles = cfg["ShowHiddenFiles"] == "true"
+	ShowFiles = cfg["ShowFiles"] == "true"
+	ShowDirs = cfg["ShowDirs"] == "true"
 
-	dirs = flist(folder)
+	dir = FilterFolder(flist(folder),
+		ShowHiddenFiles, ShowFiles, ShowDirs,
+	)
+	//TODO(4): show cfg misinput error
+
+	// clear screen
 	ErrorLine(bkgrey)
-	for i:=0;i<Win.LenY-2;i++{
-		wprint(Win, i, 0, "\033[2K"+bkgrey)
-	}
-	for i:=0;i<len(dirs);i++ {
-		if dirs[i][0] == '.' {
-			continue
-			//wuprint(Win, i, 0, HiddenFileColor)
+	wColor(bkgrey)
+	for i:=0;i<Win.LenY-2;i++ {
+		wprint(Win, i, 0, "\033[2K")
+		if i < len(dir) {
+			wprint(Win, i, 0, dir[i])
 		}
-		if ( dirs[i][len(dirs[i])-1] == '/' ) {
-			wColor(FolderColor)
-		} else {
-			wColor(FileColor)
-		}
-		if tint = strings.Index(dirs[i], "."); tint != -1 {
-			tstring = dirs[i][strings.Index(dirs[i], "."):]
-			if tstring, tbool = FileColors[tstring]; tbool {
-				wColor(tstring)
-			}
-		}
-		wprint(Win, ti, 0, dirs[i])
-		ti++
 	}
 
-	wmove(Win, 0,0)
+	wmove(Win, y, 0)
+	//TODO(4) git: get gs.go's info
+	FolderAirline(folder, "(no git yet)")
 	wgtk(Win)
 }
 
-//TODO(4) git: get gs.go's info
-//TODO(1) debug: debug display colors FG/BK
-func FolderAirline ( dir string, git string ) () {
-	ClearAll()
-	AirLine( spf(
-		"%s%s %s%s",
-		ModeText[mode], AirlineText, dir, git,
-	))
+func RemoveIndex ( s []string, i int ) ( []string ) {
+	if len(s) <= i+2 {
+		s = s[:i]
+	} else {
+		s = append(s[:i], s[i+2:]...)
+	}
+	return s
 }
 
+//Show [Hidden] File/Dir
+//S[H]F, SD
+func FilterFolder ( dir []string, SHF, SF, SD bool) ( []string ) {
+	for i:=0;i<len(dir);i++ {
+		if dir[i][0] == '.' {
+			if SHF{
+				dir[i] = HiddenFileColor+dir[i]
+			} else {
+				dir = RemoveIndex(dir, i)
+				i--
+			}
+		} else if ( dir[i][len(dir[i])-1] == '/' ) {
+			if SD {
+				dir[i] = FolderColor+dir[i]
+			} else {
+				dir = RemoveIndex(dir, i)
+				i--
+			}
+		} else {
+			if SF {
+				tint = strings.Index(dir[i], ".")
+				if tint != -1 && len(dir[i]) != 1 {
+					tstring = dir[i][tint:]
+					if tstring, tbool = FileColors[tstring]; tbool { dir[i] = tstring+dir[i]
+					} else {
+						dir[i] = txt+dir[i]
+					}
+				} else {
+					dir[i] = txt+dir[i]
+				}
+			} else {
+				dir = RemoveIndex(dir, i)
+				i--
+			}
+		}
+	}
+	return dir
+}
 
 //HTTP?
 // https links
