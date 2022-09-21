@@ -70,19 +70,6 @@ func InitFiler() {
 	}
 }
 
-// use airline
-//func ReaderAirline (filename, k string, y, x int) {
-//	ClearAirLine()
-//	AirLine(
-//		spf("%s %s %s@%s%d:%d %s%s",
-//		ModeText[mode],
-//		bk, filename,
-//		airline, y+1, x,
-//		k,
-//		txt,
-//	))
-//}
-
 func MakeAirLine (s string) {
 	ClearAirLine()
 	AirLine(
@@ -453,7 +440,6 @@ func Reader (c []string, filename string) (bool) {
 	print("\033[1 q") // blink block
 	return true
 }
-//TODO (2): bkgrey into ErrorLine
 
 // Reader out doesn't matter (when Folder().Reader())
 //FOLDER
@@ -481,7 +467,7 @@ func Folder ( folder string ) () {
 	//TODO(4): show cfg misinput error
 
 	// clear screen
-	ErrorLine(bkgrey)
+	ErrorLine(bkgrey+sws)
 	wColor(bkgrey)
 	for i:=0;i<Win.LenY-2;i++ {
 		wprint(Win, i, 0, "\033[2K")
