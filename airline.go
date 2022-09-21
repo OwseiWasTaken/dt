@@ -46,7 +46,7 @@ func InitAirLine () {
 
 func ClearAllAirLine() {
 	AirLine(slap)
-	ErrorLine(cleanslap)
+	ErrorLine(slap)
 }
 
 // Airline
