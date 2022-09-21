@@ -22,7 +22,7 @@ func InitAirLine () {
 	airline = colors["AirLine"]
 	BadError = colors["BadError"]
 	SimpleError = colors["SimpleError"]
-	txt = colors["Text"]
+	txt = colors["TextBkGrey"]
 	AirlineText = colors["AirlineText"]
 	bk = colors["AirlineText"]
 	slap = bk+sws+txt
@@ -45,20 +45,20 @@ func InitAirLine () {
 }
 
 func ClearAllAirLine() {
-	AirLine(cleanslap)
-	ErrorLine(slap)
+	AirLine(slap)
+	ErrorLine(cleanslap)
 }
 
 // Airline
 func AirLine ( s string ) {
 	// make bkground color
-	wuprint(ALW, 0, 0, bk+cleanslap)
+	wuprint(ALW, 0, 0, slap)
 	// write
 	wuprint(ALW, 0, 0, s)
 }
 
 func ClearAirLine() {
-	AirLine(cleanslap)
+	AirLine(slap)
 }
 
 // warn
@@ -68,7 +68,7 @@ func Warn(warntype int) {
 }
 
 func ClearWarn () {
-	ErrorLine(slap)
+	ErrorLine(cleanslap)
 }
 
 func ErrorLine ( s string ) {
