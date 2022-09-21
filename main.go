@@ -22,6 +22,7 @@ func main(){
 
 	// set cursor type
 	print("\033[2 q") // blink block
+	ClearAllAirLine()
 
 	Folder("file://home/ow/code/golang/dt")
 
