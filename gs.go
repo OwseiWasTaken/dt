@@ -1,7 +1,5 @@
-package main
 //TODO(1) fix all: change all this to fit as included
 
-include "gutil"
 
 // flag index
 const (
@@ -36,18 +34,22 @@ var (
 	flags = make([]bool, FlagLen)
 )
 
-func main () {
-	InitGu()
+func GetGs ( dir string ) (string) {
+	//TODO(3) colors for gs: make gs use cfg/colors
 	var (
 		GSOut string
 		branch string
   )
 
-	Out, err := exec.Command("git", "status").Output()
+	cmd := exec.Command("git", "status")
+	cmd.Dir = dir
+	Out, err := cmd.Output()
 
 	// not git directory
 	if err != nil{
-		exit(0)
+		// TODO(5): cfg/show no .git
+		PS(err)
+		return "[no .git]"
 	}
 
 	GSOut = string(Out)
@@ -60,9 +62,9 @@ func main () {
 
 
 	if branch != "master" && branch != "main" {
-		GSOut = "("+branch+" "
+		GSOut = branch+" "
 	} else {
-		GSOut = "("
+		GSOut = ""
 	}
 
 	if flags[0] {
@@ -79,8 +81,5 @@ func main () {
 		}
 	}
 
-	GSOut += RGB(255, 255, 255) + ")"
-	printf(GSOut)
-
-	exit(0)
+	return GSOut
 }
