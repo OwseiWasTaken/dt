@@ -440,7 +440,6 @@ func Reader (c []string, filename string) (bool) {
 	print("\033[1 q") // blink block
 	return true
 }
-
 // Reader out doesn't matter (when Folder().Reader())
 //FOLDER
 func Folder ( folder string ) () {
@@ -457,14 +456,13 @@ func Folder ( folder string ) () {
 		ShowDirs bool
 		y = 0
 	)
-	ShowHiddenFiles = cfg["ShowHiddenFiles"] == "true"
-	ShowFiles = cfg["ShowFiles"] == "true"
-	ShowDirs = cfg["ShowDirs"] == "true"
+	ShowHiddenFiles = ReadCFG("ShowHiddenFiles", T_bool).(bool)
+	ShowFiles = ReadCFG("ShowFiles", T_bool).(bool)
+	ShowDirs = ReadCFG("ShowDirs", T_bool).(bool)
 
 	dir = FilterFolder(flist(folder),
 		ShowHiddenFiles, ShowFiles, ShowDirs,
 	)
-	//TODO(4): show cfg misinput error
 
 	// clear screen
 	ErrorLine(bkgrey+sws)

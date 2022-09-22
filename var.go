@@ -102,11 +102,30 @@ func LoadColors ( f string ) ( ) {
 	}
 }
 
+//TODO: TerminError
+//TODO: save/make cfg files
 func save(cfg map[string]string) (bool) {
-	// TODO
 	return true
 }
 
 func MakeDefaultFiles () {
-	// TODO
 }
+
+const (
+	T_bool = iota
+	T_int = iota
+)
+
+func ReadCFG (name string, T int) (interface{}) {
+	s := cfg[name]
+	switch (T) {
+		case (T_bool):
+			if s == "false" || s == "true" {
+				return s == "true"
+			} else {
+				//TODO: break
+			}
+	}
+	return nil
+}
+
