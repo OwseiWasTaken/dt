@@ -456,9 +456,9 @@ func Folder ( folder string ) () {
 		ShowDirs bool
 		y = 0
 	)
-	ShowHiddenFiles = ReadCFG("ShowHiddenFiles", T_bool).(bool)
-	ShowFiles = ReadCFG("ShowFiles", T_bool).(bool)
-	ShowDirs = ReadCFG("ShowDirs", T_bool).(bool)
+	ShowHiddenFiles = RCfgB("ShowHiddenFiles")
+	ShowFiles = RCfgB("ShowFiles")
+	ShowDirs = RCfgB("ShowDirs")
 
 	dir = FilterFolder(flist(folder),
 		ShowHiddenFiles, ShowFiles, ShowDirs,

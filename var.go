@@ -129,3 +129,6 @@ func ReadCFG (name string, T int) (interface{}) {
 	return nil
 }
 
+func RCfgB(name string) (bool) {
+	return ReadCFG(name, T_bool).(bool)
+}
