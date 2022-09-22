@@ -32,9 +32,13 @@ func fload (f string) ([]string) {
 	}
 }
 
-//TODO fopen check dir or file
+//true:quit
 func fopen (f string) (bool) {
-	return Reader(fload(f), f[6:])
+	if f[len(f)-1] == '/' {
+		return Folder(f)
+	} else {
+		return Reader(fload(f), f[6:])
+	}
 }
 
 //READER
@@ -99,8 +103,8 @@ func WriterAirline (filename, k string, y, x, tint int) {
 
 func FolderAirline ( dir string, git string ) () {
 	MakeAirLine( spf(
-		"%s %s %s",
-		AirlineText, dir, git,
+		"%s %s %s%s",
+		AirlineText, dir, git, txt,
 	))
 }
 
@@ -170,7 +174,6 @@ func Reader (c []string, filename string) (bool) {
 	tint = 0
 
 	for k!="q" {
-		//TODO command: use ';' to use a command
 		// clear;draw text
 		for i=0;(i+w)<cl&&(i<Win.LenY-2);i++{
 			wprint(Win, i, 0, "\033[2K"+bkgrey)
@@ -186,13 +189,6 @@ func Reader (c []string, filename string) (bool) {
 
 		// use k
 		switch (k) {
-			//help
-			case ("e"):
-				tint = strings.Index(c[w+y][x:], " ")-1
-				x = tint
-			case ("w"):
-				tint = strings.Index(c[w+y][x:], " ")+1
-			//help
 			case (":"):
 				// change cursor type
 				print("\033[6 q") // I-beam
@@ -440,44 +436,89 @@ func Reader (c []string, filename string) (bool) {
 	print("\033[1 q") // blink block
 	return true
 }
+
 // Reader out doesn't matter (when Folder().Reader())
 //FOLDER
-func Folder ( folder string ) () {
+func Folder ( folder string ) (bool) {
 	// dir mode
 	mode = 2
 	// set cursor type
-	print("\033[2 q") // block
+	HideCursor()
 	FolderAirline(folder, "no git yet")
 
 	var (
 		dir []string
+		Ldir []string
+		git string
 		ShowHiddenFiles bool
 		ShowFiles bool
 		ShowDirs bool
+		k string
+		ld int
+		i int
 		y = 0
 	)
+
+	git = GetGs(folder[6:])
 	ShowHiddenFiles = RCfgB("ShowHiddenFiles")
 	ShowFiles = RCfgB("ShowFiles")
 	ShowDirs = RCfgB("ShowDirs")
 
 	dir = FilterFolder(flist(folder),
-		ShowHiddenFiles, ShowFiles, ShowDirs,
+		ShowHiddenFiles, ShowFiles, ShowDirs, true,
 	)
+	Ldir = FilterFolder(flist(folder),
+		ShowHiddenFiles, ShowFiles, ShowDirs, false,
+	)
+	ld = len(dir)
+	if len(Ldir) != ld {
+		PS("fuck")
+		wgtk(Win)
+	}
 
 	// clear screen
 	ErrorLine(bkgrey+sws)
 	wColor(bkgrey)
 	for i:=0;i<Win.LenY-2;i++ {
 		wprint(Win, i, 0, "\033[2K")
-		if i < len(dir) {
-			wprint(Win, i, 0, dir[i])
-		}
 	}
 
-	// TODO(4): get folder name from spwd
-	FolderAirline(folder, GetGs(folder[6:]))
-	wmove(Win, y, 0)
-	wgtk(Win)
+	for k!="backspace"{
+		FolderAirline(folder, git)
+		for i=0;i<ld;i++ {
+			if i < ld {
+				wprint(Win, i, 0, "\033[2K")
+				if i == y {
+					wprint(Win, i, 0, dir[i]+colors["red"]+"*")
+				} else {
+					wprint(Win, i, 0, dir[i])
+				}
+			}
+		}
+		wmove(Win, y, 0)
+		k = wgtk(Win)
+		switch (k) {
+			case ("j"):
+				if ld != y+1{
+					y++
+				}
+			case ("k"):
+				if y != 0 {
+					y--
+				}
+			case ("enter"):
+				if fopen(folder+Ldir[y]) {
+					return true
+				}
+				HideCursor()
+			case ("q"):
+				return true
+		}
+		ErrorLine(spf("%v", y))
+	}
+
+	ShowCursor()
+	return false
 }
 
 func RemoveIndex ( s []string, i int ) ( []string ) {
@@ -491,18 +532,23 @@ func RemoveIndex ( s []string, i int ) ( []string ) {
 
 //Show [Hidden] File/Dir
 //S[H]F, SD
-func FilterFolder ( dir []string, SHF, SF, SD bool) ( []string ) {
+//Use Colors
+func FilterFolder ( dir []string, SHF, SF, SD, UC bool) ( []string ) {
 	for i:=0;i<len(dir);i++ {
 		if dir[i][0] == '.' {
-			if SHF{
-				dir[i] = HiddenFileColor+dir[i]
+			if SHF {
+				if UC {
+					dir[i] = HiddenFileColor+dir[i]
+				}
 			} else {
 				dir = RemoveIndex(dir, i)
 				i--
 			}
 		} else if ( dir[i][len(dir[i])-1] == '/' ) {
 			if SD {
-				dir[i] = FolderColor+dir[i]
+				if UC {
+					dir[i] = FolderColor+dir[i]
+				}
 			} else {
 				dir = RemoveIndex(dir, i)
 				i--
@@ -512,12 +558,19 @@ func FilterFolder ( dir []string, SHF, SF, SD bool) ( []string ) {
 				tint = strings.Index(dir[i], ".")
 				if tint != -1 && len(dir[i]) != 1 {
 					tstring = dir[i][tint:]
-					if tstring, tbool = FileColors[tstring]; tbool { dir[i] = tstring+dir[i]
+					if tstring, tbool = FileColors[tstring]; tbool {
+						if UC {
+							dir[i] = tstring+dir[i]
+						}
 					} else {
-						dir[i] = txt+dir[i]
+						if UC {
+							dir[i] = txt+dir[i]
+						}
 					}
 				} else {
-					dir[i] = txt+dir[i]
+					if UC {
+						dir[i] = txt+dir[i]
+					}
 				}
 			} else {
 				dir = RemoveIndex(dir, i)
