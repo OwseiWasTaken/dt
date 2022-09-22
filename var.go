@@ -32,9 +32,10 @@ func debug () () {
 	// add FileColors?
 	i=0
 	for key, val := range colors {
-		wprint(Win, i, 0, spf("%s:%s████   %s", key, val, colors["nc"]))
+		wprint(Win, i, 0, spf("%s:%spog████   %s", key, val, colors["nc"]))
 		i++
 	}
+	wgtk(Win)
 }
 
 func InitVars () {
@@ -58,6 +59,10 @@ func load (f string) () {
 }
 
 func InterpretColorLine ( line string ) ( string, string ) {
+	h := line[0]=='"'
+	if h {
+		line = line[1:]
+	}
 	line = strings.Replace(line, " ", "", -1)
 	var ll = strings.Split(line, ":")
 	var name = ""
@@ -68,7 +73,11 @@ func InterpretColorLine ( line string ) ( string, string ) {
 	if len(cd) == 1 {
 		code = colors[cd[0]]
 	} else if len(cd) == 3 {
-		code = RGB(cd[0], cd[1], cd[2])
+		if h{
+			code = bkcolor(cd[0], cd[1], cd[2])
+		} else {
+			code = RGB(cd[0], cd[1], cd[2])
+		}
 	} else if len(cd) == 6 {
 		code = color(cd[0],cd[1],cd[2], cd[3],cd[4],cd[5])
 	}
@@ -94,6 +103,11 @@ func LoadColors ( f string ) ( ) {
 			name, code = InterpretColorLine(line)
 			if len(name) == 0 || len(code) == 0 {continue}
 			FileColors[name] = code
+		if line[0] == '"'  {
+			name, code = InterpretColorLine(line)
+			if len(name) == 0 || len(code) == 0 {continue}
+			colors[name] = code
+		}
 		} else if line[0] != '#' {
 			name, code = InterpretColorLine(line)
 			if len(name) == 0 || len(code) == 0 {continue}
