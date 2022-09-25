@@ -68,7 +68,7 @@ func InitFiler() {
 	FolderColor = colors["FolderColor"]
 	HiddenFileColor = colors["HiddenFileColor"]
 	ModeText = [...]string{
-		colors["NormalMode"]+" NORMAL  "+AirlineText,
+		colors["NormalMode"]+" NORMAL "+AirlineText,
 		colors["InsertMode"]+" INSERT "+AirlineText,
 		colors["NewTree"]+" NEWTREE "+AirlineText,
 	}
