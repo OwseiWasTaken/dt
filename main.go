@@ -24,7 +24,7 @@ func main(){
 	print("\033[2 q") // blink block
 	ClearAllAirLine()
 
-	Folder("file://home/ow/code/golang/dt")
+	Folder("file://home/owsei/Documents/projs/dt/")
 
 	StopTermin()
 	exit(0)
