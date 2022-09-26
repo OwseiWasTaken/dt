@@ -24,8 +24,12 @@ func main(){
 	print("\033[2 q") // blink block
 	ClearAllAirLine()
 
-	Folder("file://home/owsei/Documents/projs/dt/")
+	fopen("file://home/owsei/Documents/projs/dt/main.go")
+	//debug()
 
+	ShowCursor()
+	print("\033[2 q") // blink block
+	clear()
 	StopTermin()
 	exit(0)
 }
