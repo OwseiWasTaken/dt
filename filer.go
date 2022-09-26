@@ -68,10 +68,27 @@ func InitFiler() {
 	FolderColor = colors["FolderColor"]
 	HiddenFileColor = colors["HiddenFileColor"]
 	ModeText = [...]string{
-		colors["NormalMode"]+" NORMAL "+AirlineText,
-		colors["InsertMode"]+" INSERT "+AirlineText,
-		colors["NewTree"]+" NEWTREE "+AirlineText,
+		colors["NormalMode"]+" NORMAL "+AirlineText+" ",
+		colors["InsertMode"]+" INSERT "+AirlineText+" ",
+		colors["NewTree"]+" NEWTREE "+AirlineText+" ",
 	}
+}
+
+func ShortenName (f string) (string) {
+	var r = "/"
+	var index int
+	var gone int // chars already gone over
+	for {
+		index = strings.Index(f[gone:], "/")
+		PS(f[gone:gone+index+1])
+		gone+=index+1
+		if strings.Index(f[gone:], "/") == -1 {
+			r+=f[gone:]
+			break
+		}
+		r+=string(f[gone:gone+index+1][0])+"/"
+	}
+	return r
 }
 
 func MakeAirLine (s string) {
@@ -83,9 +100,10 @@ func MakeAirLine (s string) {
 
 func ReaderAirline (filename, k string, y, x int) {
 	MakeAirLine( spf(
-		"%s%s@%s%d:%d %s%s",
+		"%s%s@%d:%d %s%s",
+		AirlineText,
 		filename,
-		airline, y+1, x,
+		y+1, x,
 		k,
 		txt,
 	))
@@ -149,6 +167,7 @@ func Reader (c []string, filename string) (bool) {
 		i int
 
 		cmd string
+		shortname string
 		// read
 		cl = len(c)
 		off = cl-Win.LenY+1
@@ -158,6 +177,8 @@ func Reader (c []string, filename string) (bool) {
 		x = 0
 		w = 0//window shift
 	)
+
+	shortname = ShortenName(filename[6:])
 
 	for i:=0;i<len(c);i++ {
 		c[i] = untab(c[i])
@@ -181,7 +202,7 @@ func Reader (c []string, filename string) (bool) {
 		}
 
 		// print airline
-		ReaderAirline(filename, k, y+w, x)
+		ReaderAirline(shortname, k, y+w, x)
 
 		// move cursor;get k
 		wmove(Win, y, x)
