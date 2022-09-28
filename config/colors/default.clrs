@@ -13,12 +13,12 @@ nc:255,255,255,0,0,0
 
 # background
 bkgrey:240,240,240,27,27,27
-FlAirlineColor:160,160,160,34,34,34
+FlAirLineColor:160,160,160,34,34,34
 
 # Colors
 Text:240,240,240
 TextBkGrey:240,240,240,27,27,27
-AirlineText:140,140,140,54,54,54
+AirLineText:140,140,140,54,54,54
 
 # Reader
 

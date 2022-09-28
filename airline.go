@@ -1,9 +1,11 @@
 // ==status=line==
 // error line
+//TODO(2) error line -> report line: (w/ error features)
+
 
 var (
 	airline string
-	AirlineText string
+	AirLineText string
 	BadError string
 	SimpleError string
 	slap string
@@ -23,8 +25,8 @@ func InitAirLine () {
 	BadError = colors["BadError"]
 	SimpleError = colors["SimpleError"]
 	txt = colors["TextBkGrey"]
-	AirlineText = colors["AirlineText"]
-	bk = colors["AirlineText"]
+	AirLineText = colors["AirLineText"]
+	bk = colors["AirLineText"]
 	slap = bk+sws+txt
 	cleanslap = txt+sws
 
@@ -33,7 +35,7 @@ func InitAirLine () {
 		BadError+"No file from link",
 		SimpleError+"Not a link",
 		SimpleError+"Command Empty",
-		BadError+"No Such Command",
+		BadError+"No Such Command \"%s\"",
 	}
 
 	// make airline window
@@ -46,10 +48,10 @@ func InitAirLine () {
 
 func ClearAllAirLine() {
 	AirLine(slap)
-	ErrorLine(cleanslap)
+	ReportLine(cleanslap)
 }
 
-// Airline
+// AirLine
 func AirLine ( s string ) {
 	// make bkground color
 	wuprint(ALW, 0, 0, slap)
@@ -63,15 +65,34 @@ func ClearAirLine() {
 
 // warn
 func Warn(warntype int) {
-	ClearWarn()
-	ErrorLine(ErrorText[warntype]+txt)
+	ClearReport()
+	ReportLine(ErrorText[warntype]+txt)
 }
 
-func ClearWarn () {
-	ErrorLine(cleanslap)
+func AdvWarn(warntype int, inp ...string) {
+	ClearReport()
+	t:=ErrorText[warntype]
+	for i:=0;i<len(inp);i++ {
+		t = spf(t, inp[i])
+	}
+	ReportLine(t)
+	wColor(txt)
 }
 
-func ErrorLine ( s string ) {
+func ReportInternalError( s string, ec int ) {
+	ClearReport()
+	ReportLine(s)
+	wgtk(Win)
+	if ec != 0 {
+		exit(ec)
+	}
+}
+
+func ClearReport() {
+	ReportLine(cleanslap)
+}
+
+func ReportLine ( s string ) {
 	wuprint(ALW, 1, 0, s)
 }
 
