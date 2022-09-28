@@ -9,28 +9,28 @@ include "abspath"
 include "gs"
 
 func main(){
-	// init screen
-	InitTermin()
+  // init screen
+  InitTermin()
 
-	// init cfg file
-	InitVars()
+  // init cfg file
+  InitVars()
 
-	// load cfg
-	InitAirLine()
-	InitFiler()
+  // load cfg
+  InitAirLine()
+  InitFiler()
 
 
-	// set cursor type
-	print("\033[2 q") // blink block
-	ClearAllAirLine()
+  // set cursor type
+  print("\033[2 q") // blink block
+  ClearAllAirLine()
 
-	fopen("file://home/owsei/Documents/projs/dt/main.go")
-	//debug()
+  fopen("file://home/owsei/Documents/projs/dt/")
+  //debug()
 
-	ShowCursor()
-	print("\033[2 q") // blink block
-	clear()
-	StopTermin()
-	exit(0)
+  ShowCursor()
+  print("\033[2 q") // blink block
+  clear()
+  StopTermin()
+  exit(0)
 }
 
