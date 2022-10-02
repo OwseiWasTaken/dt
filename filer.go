@@ -218,6 +218,12 @@ func Reader (c []string, filename string) (bool) {
 
 		// use k
 		switch (k) {
+			case ("w"):
+				tint = strings.Index(c[w+y], " ")
+				if tint > 0 {
+					x = tint
+				}
+				//TODO: jump to next line
 			case (":"):
 				// change cursor type
 				print("\033[6 q") // I-beam
@@ -240,62 +246,63 @@ func Reader (c []string, filename string) (bool) {
 						break
 					}
 				}
-				if len(tstring) != 0 {
-
-					args = strings.Split(tstring, " ")
-					if len(args) == 0 {
-						Warn(2)// Empty
-					}
-
-					if len(args) > 1 {
-						cmd = args[0]
-						args = args[1:]
-					} else {
-						cmd = args[0]
-						args = []string{}
-					}
-
-					// report command
-					ReportLine(tstring)
-					switch cmd {
-						case (":w"):
-							//save
-							// retab
-							if len(args) == 1 {
-								shortname = ShortenName(args[0])
-								filename = "file://"+args[0]
-								_, terror = os.OpenFile(args[0], os.O_CREATE|os.O_WRONLY, 0644)
-								if terror != nil {
-									AdvWarn(5, spf("%v", terror))
-								}
-							}
-							terror = os.WriteFile(
-								filename,
-								[]byte(retab(strings.Join(c, "\n"))),
-								0644,//TODO: change file 0otype
-							)
-							if !exists(args[0]) {
-								AdvWarn(4, filename + spf("%v", terror), "d")
-							}
-						case (":q"):
-							clear()
-							// reset cursor type
-							print("\033[1 q") // blink block
-							return true
-						case (":wq"):
-							clear()
-							print("\033[1 q")
-							WriteFile(filename, retab(strings.Join(c, "\n")))
-							return true
-						default:
-							// overwrite report with error
-							AdvWarn(3, tstring)
-							//ReportLine(ErrorText[3]+" '"+tstring+"'"+txt)
-					}
-					tstring = ""
-				}
-				// set cursor type
+				// reset cursor type
 				print("\033[2 q") // block
+				if len(tstring) == 0 {
+					break
+				}
+
+				args = strings.Split(tstring, " ")
+				if len(args) == 0 {
+					Warn(2)// Empty
+				}
+
+				if len(args) > 1 {
+					cmd = args[0]
+					args = args[1:]
+				} else {
+					cmd = args[0]
+					args = []string{}
+				}
+
+				// report command
+				ReportLine(tstring)
+				switch cmd {
+					case (":w"):
+						//save
+						// retab
+						if len(args) == 1 {
+							shortname = ShortenName(args[0])
+							filename = "file://"+args[0]
+							_, terror = os.OpenFile(args[0], os.O_CREATE|os.O_WRONLY, 0644)
+							if terror != nil {
+								AdvWarn(5, spf("%v", terror))
+							}
+						}
+						terror = os.WriteFile(
+							filename,
+							[]byte(retab(strings.Join(c, "\n"))),
+							0644,//TODO: change file 0otype
+						)
+						if !exists(args[0]) {
+							AdvWarn(4, filename + spf("%v", terror), "d")
+						}
+					case (":q"):
+						clear()
+						// reset cursor type
+						print("\033[1 q") // blink block
+						return true
+					case (":wq"):
+						clear()
+						print("\033[1 q")
+						WriteFile(filename, retab(strings.Join(c, "\n")))
+						return true
+					default:
+						// overwrite report with error
+						AdvWarn(3, tstring)
+						//ReportLine(ErrorText[3]+" '"+tstring+"'"+txt)
+				tstring = ""
+				}
 			case "backspace", "^H":
 				ClearAll()
 				return false
@@ -310,17 +317,13 @@ func Reader (c []string, filename string) (bool) {
 			case ("enter"):
 				tstring = c[y+w][x:]
 				tstring = strings.Split(tstring, " ")[0]
-				if fvalid(tstring) {
-					if fcan(tstring) {
-							ClearAll()
-							if (fopen(tstring)) {
-								return true
-							}
-					} else {
-						Warn(0) // warn: no file from link
-					}
+				if can(tstring) {
+						ClearAll()
+						if (fopen(tstring)) {
+							return true
+						}
 				} else {
-					Warn(1) // warn: not a link
+					Warn(1) // warn: no file from link
 				}
 			case ("g"):
 				w = 0
