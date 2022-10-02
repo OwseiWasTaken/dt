@@ -58,6 +58,7 @@ var (
 	tint int
 	tbool bool
 	terror error
+	//FEW *window
 
 	mode = 0
 )
@@ -70,10 +71,14 @@ func InitFiler() {
 	FolderColor = colors["FolderColor"]
 	HiddenFileColor = colors["HiddenFileColor"]
 	ModeText = [...]string{
-		colors["NormalMode"]+" NORMAL "+AirlineText+" ",
-		colors["InsertMode"]+" INSERT "+AirlineText+" ",
-		colors["NewTree"]+" NEWTREE "+AirlineText+" ",
+		colors["NormalMode"]+" NORMAL "+AirLineText+" ",
+		colors["InsertMode"]+" INSERT "+AirLineText+" ",
+		colors["NewTree"]+" NEWTREE "+AirLineText+" ",
 	}
+	//FEW = MakeWin(
+	//	"Filer/Editor Window",
+	//	stdout, stdin
+	//)
 }
 
 func ShortenName (f string) (string) {
@@ -99,10 +104,10 @@ func MakeAirLine (s string) {
 	)
 }
 
-func ReaderAirline (filename, k string, y, x int) {
+func ReaderAirLine (filename, k string, y, x int) {
 	MakeAirLine( spf(
 		"%s%s@%d:%d %s%s",
-		AirlineText,
+		AirLineText,
 		filename,
 		y+1, x,
 		k,
@@ -110,7 +115,7 @@ func ReaderAirline (filename, k string, y, x int) {
 	))
 }
 
-func WriterAirline (filename, k string, y, x, tint int) {
+func WriterAirLine (filename, k string, y, x, tint int) {
 	MakeAirLine( spf(
 		"%s%s@%s%d:%d::%d %s%s",
 		bk, filename,
@@ -120,10 +125,10 @@ func WriterAirline (filename, k string, y, x, tint int) {
 	))
 }
 
-func FolderAirline ( dir string, git string ) () {
+func FolderAirLine ( dir string, git string ) () {
 	MakeAirLine( spf(
 		"%s %s %s%s",
-		AirlineText, dir, git, txt,
+		AirLineText, dir, git, txt,
 	))
 }
 
@@ -202,7 +207,7 @@ func Reader (c []string, filename string) (bool) {
 		}
 
 		// print airline
-		ReaderAirline(shortname, k, y+w, x)
+		ReaderAirLine(shortname, k, y+w, x)
 
 		// move cursor;get k
 		wmove(Win, y, x)
@@ -214,11 +219,11 @@ func Reader (c []string, filename string) (bool) {
 				// change cursor type
 				print("\033[6 q") // I-beam
 				ClearReport()
-				wmove(Win, ALW.MinY+1, 0)
+				wmove(ALW, ALW.MinY+1, 0)
 				tstring = ":"
 				for {
 					ReportLine(tstring)
-					k = wgtk(Win)
+					k = wgtk(ALW)
 					if len(k) == 1 {
 						tstring += k
 					} else if k == "backspace" && len(tstring) != 0 {
@@ -379,7 +384,7 @@ func Reader (c []string, filename string) (bool) {
 					}
 
 					// print airline
-					WriterAirline(filename, k, y+w, x, tint)
+					WriterAirLine(filename, k, y+w, x, tint)
 					// move cursor;get k
 					wmove(Win, y, x)
 					//
@@ -468,7 +473,7 @@ func Folder ( folder string ) (bool) {
 	mode = 2
 	// set cursor type
 	HideCursor()
-	FolderAirline(folder, "no git yet")
+	FolderAirLine(folder, "no git yet")
 
 	var (
 		dir []string
@@ -513,7 +518,7 @@ func Folder ( folder string ) (bool) {
 	}
 
 	for k!="backspace"&&k!="^H"{
-		FolderAirline(folder, git)
+		FolderAirLine(folder, git)
 		for i=0;i<ld;i++ {
 			if i < ld {
 				wprint(Win, i, 0, "\033[2K")
