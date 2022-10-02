@@ -30,6 +30,7 @@ func InitAirLine () {
 	slap = bk+sws+txt
 	cleanslap = txt+sws
 
+	//TODO: ENUM for errors
 	// define errors
 	ErrorText = []string{
 		"UNUSED ERROR",
