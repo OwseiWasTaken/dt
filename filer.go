@@ -161,7 +161,6 @@ func untab ( l string ) ( string ) {
 	return strings.Replace(l, "\t", " "+" ", 1)
 }
 
-//TODO(1): make reader win
 func Reader (c []string, filename string) (bool) {
 	// normal mode
 	mode = 0
@@ -282,7 +281,8 @@ func Reader (c []string, filename string) (bool) {
 						terror = os.WriteFile(
 							filename,
 							[]byte(retab(strings.Join(c, "\n"))),
-							0644,//TODO: change file 0otype
+							0644,
+							//TODO: change file 0otype
 						)
 						if !exists(args[0]) {
 							AdvWarn(4, filename + spf("%v", terror), "d")

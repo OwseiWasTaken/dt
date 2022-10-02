@@ -1,6 +1,5 @@
 // ==status=line==
 // error line
-//TODO(2) error line -> report line: (w/ error features)
 
 
 var (
