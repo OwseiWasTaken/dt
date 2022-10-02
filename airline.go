@@ -16,7 +16,7 @@ var (
 
 	ErrorText []string
 
-	ALW *Window
+	Alw *Window
 )
 
 func InitAirLine () {
@@ -32,14 +32,16 @@ func InitAirLine () {
 
 	// define errors
 	ErrorText = []string{
-		BadError+"No file from link",
-		SimpleError+"Not a link",
+		SimpleError+"No File From Link",
+		SimpleError+"Not A Link",
 		SimpleError+"Command Empty",
 		BadError+"No Such Command \"%s\"",
+		BadError+"Can't Write To File %s: %s",
+		BadError+"Can't Create File %s",
 	}
 
 	// make airline window
-	ALW = MakeWin(
+	Alw = MakeWin(
 		"AirLine Window",
 		stdout, stdin,
 		Win.LenY-2, Win.LenY, 0, Win.LenX,
@@ -54,9 +56,9 @@ func ClearAllAirLine() {
 // AirLine
 func AirLine ( s string ) {
 	// make bkground color
-	wuprint(ALW, 0, 0, slap)
+	wuprint(Alw, 0, 0, slap)
 	// write
-	wuprint(ALW, 0, 0, s)
+	wuprint(Alw, 0, 0, s)
 }
 
 func ClearAirLine() {
@@ -82,7 +84,7 @@ func AdvWarn(warntype int, inp ...string) {
 func ReportInternalError( s string, ec int ) {
 	ClearReport()
 	ReportLine(s)
-	wgtk(ALW)
+	wgtk(Alw)
 	if ec != 0 {
 		exit(ec)
 	}
@@ -93,6 +95,6 @@ func ClearReport() {
 }
 
 func ReportLine ( s string ) {
-	wuprint(ALW, 1, 0, s)
+	wuprint(Alw, 1, 0, s)
 }
 
