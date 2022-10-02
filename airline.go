@@ -82,7 +82,7 @@ func AdvWarn(warntype int, inp ...string) {
 func ReportInternalError( s string, ec int ) {
 	ClearReport()
 	ReportLine(s)
-	wgtk(Win)
+	wgtk(ALW)
 	if ec != 0 {
 		exit(ec)
 	}
