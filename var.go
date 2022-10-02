@@ -32,7 +32,7 @@ func debug () () {
 	// add FileColors?
 	i=0
 	for key, val := range colors {
-		wprint(Win, i, 0, spf("%s:%spog████   %s", key, val, colors["nc"]))
+		wprint(Win, i, 0, spf("%s:%spog████		%s", key, val, colors["nc"]))
 		i++
 	}
 	wgtk(Win)
@@ -116,33 +116,7 @@ func LoadColors ( f string ) ( ) {
 	}
 }
 
-//TODO: TerminError
 //TODO: save/make cfg files
 func save(cfg map[string]string) (bool) {
 	return true
-}
-
-func MakeDefaultFiles () {
-}
-
-const (
-	T_bool = iota
-	T_int = iota
-)
-
-func ReadCFG (name string, T int) (interface{}) {
-	s := cfg[name]
-	switch (T) {
-		case (T_bool):
-			if s == "false" || s == "true" {
-				return s == "true"
-			} else {
-				//TODO: break
-			}
-	}
-	return nil
-}
-
-func RCfgB(name string) (bool) {
-	return ReadCFG(name, T_bool).(bool)
 }
