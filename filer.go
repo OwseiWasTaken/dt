@@ -58,7 +58,7 @@ var (
 	tint int
 	tbool bool
 	terror error
-	//FEW *window
+	Few *Window
 
 	mode = 0
 )
@@ -75,10 +75,12 @@ func InitFiler() {
 		colors["InsertMode"]+" INSERT "+AirLineText+" ",
 		colors["NewTree"]+" NEWTREE "+AirLineText+" ",
 	}
-	//FEW = MakeWin(
-	//	"Filer/Editor Window",
-	//	stdout, stdin
-	//)
+	Few = MakeWin(
+		"Filer/Editor Window",
+		stdout, stdin,
+		0, Win.LenY-3,
+		0, Win.LenX,
+	)
 }
 
 func ShortenName (f string) (string) {
@@ -133,8 +135,8 @@ func FolderAirLine ( dir string, git string ) () {
 }
 
 func ClearAll () () {
-	for i:=0;i<Win.LenY-2;i++{
-		wprint(Win, i, 0, "\033[2K")
+	for i:=0;i<Few.MaxY;i++{
+		wprint(Few, i, 0, "\033[2K")
 	}
 	ClearAllAirLine()
 	ReportLine(bkgrey+sws)
@@ -165,17 +167,18 @@ func Reader (c []string, filename string) (bool) {
 	mode = 0
 	// set cursor type
 	ShowCursor()
-	wuprint(Win, 0, 0, "\033[2 q") // block
+	wuprint(Few, 0, 0, "\033[2 q") // block
 	var (
 		// loop
 		k string
 		i int
 
 		cmd string
+		args []string
 		shortname string
 		// read
 		cl = len(c)
-		off = cl-Win.LenY+1
+		off = cl-Few.LenY-1
 		//ll []int
 
 		y = 0
@@ -201,17 +204,17 @@ func Reader (c []string, filename string) (bool) {
 
 	for k!="q" {
 		// clear;draw text
-		for i=0;(i+w)<cl&&(i<Win.LenY-2);i++{
-			wprint(Win, i, 0, "\033[2K"+bkgrey)
-			wprint(Win, i, 0, c[i+w])
+		for i=0;(i+w)<cl&&(i<Few.LenY);i++{
+			wprint(Few, i, 0, "\033[2K"+bkgrey)
+			wprint(Few, i, 0, c[i+w])
 		}
 
 		// print airline
 		ReaderAirLine(shortname, k, y+w, x)
 
 		// move cursor;get k
-		wmove(Win, y, x)
-		k = wgtk(Win)
+		wmove(Few, y, x)
+		k = wgtk(Few)
 
 		// use k
 		switch (k) {
@@ -219,11 +222,11 @@ func Reader (c []string, filename string) (bool) {
 				// change cursor type
 				print("\033[6 q") // I-beam
 				ClearReport()
-				wmove(ALW, ALW.MinY+1, 0)
+				wmove(Alw, Alw.LenY-2, 0)// move to report line
 				tstring = ":"
 				for {
 					ReportLine(tstring)
-					k = wgtk(ALW)
+					k = wgtk(Alw)
 					if len(k) == 1 {
 						tstring += k
 					} else if k == "backspace" && len(tstring) != 0 {
@@ -239,17 +242,17 @@ func Reader (c []string, filename string) (bool) {
 				}
 				if len(tstring) != 0 {
 
-					cl := strings.Split(tstring, " ")
-					if len(cl) == 0 {
+					args = strings.Split(tstring, " ")
+					if len(args) == 0 {
 						Warn(2)// Empty
 					}
 
-					if len(cl) > 1 {
-						cmd = cl[0]
-						cl = cl[1:]
+					if len(args) > 1 {
+						cmd = args[0]
+						args = args[1:]
 					} else {
-						cmd = cl[0]
-						cl = []string{}
+						cmd = args[0]
+						args = []string{}
 					}
 
 					// report command
@@ -258,11 +261,31 @@ func Reader (c []string, filename string) (bool) {
 						case (":w"):
 							//save
 							// retab
-							WriteFile(filename, retab(strings.Join(c, "\n")))
+							if len(args) == 1 {
+								shortname = ShortenName(args[0])
+								filename = "file://"+args[0]
+								_, terror = os.OpenFile(args[0], os.O_CREATE|os.O_WRONLY, 0644)
+								if terror != nil {
+									AdvWarn(5, spf("%v", terror))
+								}
+							}
+							terror = os.WriteFile(
+								filename,
+								[]byte(retab(strings.Join(c, "\n"))),
+								0644,//TODO: change file 0otype
+							)
+							if !exists(args[0]) {
+								AdvWarn(4, filename + spf("%v", terror), "d")
+							}
 						case (":q"):
 							clear()
 							// reset cursor type
 							print("\033[1 q") // blink block
+							return true
+						case (":wq"):
+							clear()
+							print("\033[1 q")
+							WriteFile(filename, retab(strings.Join(c, "\n")))
 							return true
 						default:
 							// overwrite report with error
@@ -327,7 +350,7 @@ func Reader (c []string, filename string) (bool) {
 					w--
 				}
 			case ("j"):
-				if y < Win.LenY-3 && (y+w+1) < cl {
+				if y < Few.LenY-1 && (y+w+1) < cl {
 					y++
 					x = tint
 					//ll
@@ -378,17 +401,17 @@ func Reader (c []string, filename string) (bool) {
 				print("\033[6 q") // I-beam
 				for k!="esc" {
 					// clear;draw text
-					for i=0;(i+w)<cl&&(i<Win.LenY-2);i++{
-						wprint(Win, i, 0, "\033[2K")
-						wprint(Win, i, 0, c[i+w])
+					for i=0;(i+w)<cl&&(i<Few.LenY);i++{
+						wprint(Few, i, 0, "\033[2K")
+						wprint(Few, i, 0, c[i+w])
 					}
 
 					// print airline
 					WriterAirLine(filename, k, y+w, x, tint)
 					// move cursor;get k
-					wmove(Win, y, x)
+					wmove(Few, y, x)
 					//
-					k = wgtk(Win)
+					k = wgtk(Few)
 					//
 					if len(k) == 1{
 						c[y+w] = c[y+w][:x]+k+c[y+w][x:]
@@ -415,7 +438,7 @@ func Reader (c []string, filename string) (bool) {
 								tint = x
 							}
 						case ("down"):
-							if y == Win.LenY-3 {
+							if y == Few.LenY-1 {
 								if w < off {
 									w++
 								}
@@ -506,31 +529,31 @@ func Folder ( folder string ) (bool) {
 
 	ld = len(dir)
 	if len(Ldir) != ld {
-		wuprint(Win, 0, 0, "fuck")
-		wgtk(Win)
+		wuprint(Few, 0, 0, "fuck")
+		wgtk(Few)
 	}
 
 	// clear screen
 	ClearReport()
 	wColor(bkgrey)
-	for i:=0;i<Win.LenY-2;i++ {
-		wprint(Win, i, 0, "\033[2K")
+	for i:=0;i<Few.LenY;i++ {
+		wprint(Few, i, 0, "\033[2K")
 	}
 
 	for k!="backspace"&&k!="^H"{
 		FolderAirLine(folder, git)
 		for i=0;i<ld;i++ {
 			if i < ld {
-				wprint(Win, i, 0, "\033[2K")
+				wprint(Few, i, 0, "\033[2K")
 				if i == y {
-					wprint(Win, i, 0, dir[i]+mark)
+					wprint(Few, i, 0, dir[i]+mark)
 				} else {
-					wprint(Win, i, 0, dir[i])
+					wprint(Few, i, 0, dir[i])
 				}
 			}
 		}
-		wmove(Win, y, 0)
-		k = wgtk(Win)
+		wmove(Few, y, 0)
+		k = wgtk(Few)
 		switch (k) {
 			case ("j"):
 				if ld != y+1{
