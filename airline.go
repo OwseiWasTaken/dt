@@ -32,8 +32,8 @@ func InitAirLine () {
 
 	// define errors
 	ErrorText = []string{
-		SimpleError+"No File From Link",
-		SimpleError+"Not A Link",
+		"UNUSED ERROR",
+		SimpleError+"Invalid Link",
 		SimpleError+"Command Empty",
 		BadError+"No Such Command \"%s\"",
 		BadError+"Can't Write To File %s: %s",
