@@ -1,5 +1,3 @@
-//TODO(1) fix all: change all this to fit as included
-
 
 // flag index
 const (
@@ -34,12 +32,27 @@ var (
 	flags = make([]bool, FlagLen)
 )
 
+var (
+	OK string
+	Upload string
+	Commit string
+)
+
+func InitGs () {
+	//Ok
+	OK = colors["GS.git.OK"]
+	//local commit -> remote
+	Upload = colors["GS.git.ToUpload"]
+	//local Update -> commit
+	Commit = colors["GS.git.ToUpdate"]
+}
+
 func GetGs ( dir string ) (string) {
 	//TODO(3) colors for gs: make gs use cfg/colors
 	var (
 		GSOut string
 		branch string
-  )
+	)
 
 	cmd := exec.Command("git", "status")
 	cmd.Dir = dir
@@ -68,11 +81,11 @@ func GetGs ( dir string ) (string) {
 	}
 
 	if flags[0] {
-		GSOut += RGB(60, 255, 60)
+		GSOut += OK
 	} else if flags[3] {
-		GSOut += RGB(60, 60, 255)
+		GSOut += Upload
 	} else {
-		GSOut += RGB(255, 60, 60)
+		GSOut += Commit
 	}
 
 	for i:=0;i<FlagLen;i++ {
