@@ -23,7 +23,7 @@ func main(){
 	print("\033[2 q") // blink block
 	ClearAllAirLine()
 
-	fopen("file://home/owsei/projs/dt/main.go")
+	fopen("file://home/owsei/projs/dt/")
 	//debug()
 
 	ShowCursor()
