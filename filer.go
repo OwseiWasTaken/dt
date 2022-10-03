@@ -317,7 +317,7 @@ func Reader (c []string, filename string) (bool) {
 			case ("enter"):
 				tstring = c[y+w][x:]
 				tstring = strings.Split(tstring, " ")[0]
-				if can(tstring) {
+				if fcan(tstring) {
 						ClearAll()
 						if (fopen(tstring)) {
 							return true
@@ -503,7 +503,7 @@ func Folder ( folder string ) (bool) {
 
 	var (
 		dir []string
-		Ldir []string
+		Cdir []string
 		fl = flist(folder)
 		git string
 		ShowHiddenFiles bool
@@ -524,15 +524,20 @@ func Folder ( folder string ) (bool) {
 	ShowDirs = RCfgB("ShowDirs")
 
 	dir = FilterFolder(fl,
-		ShowHiddenFiles, ShowFiles, ShowDirs, true,
+		ShowHiddenFiles, ShowFiles, ShowDirs, false,
 	)
-	Ldir = FilterFolder(fl,
+
+	//fuck it, no colors
+	// i'll do that shit later
+	Cdir = FilterFolder(fl,
 		ShowHiddenFiles, ShowFiles, ShowDirs, false,
 	)
 
 	ld = len(dir)
-	if len(Ldir) != ld {
+	if len(Cdir) != ld {
 		wuprint(Few, 0, 0, "fuck")
+		wuprint(Few, 1, 0, spf("%v", Cdir))
+		wuprint(Few, 2, 0, spf("%v", dir))
 		wgtk(Few)
 	}
 
@@ -549,9 +554,9 @@ func Folder ( folder string ) (bool) {
 			if i < ld {
 				wprint(Few, i, 0, "\033[2K")
 				if i == y {
-					wprint(Few, i, 0, dir[i]+mark)
+					wprint(Few, i, 0, Cdir[i]+mark)
 				} else {
-					wprint(Few, i, 0, dir[i])
+					wprint(Few, i, 0, Cdir[i])
 				}
 			}
 		}
@@ -567,9 +572,10 @@ func Folder ( folder string ) (bool) {
 					y--
 				}
 			case ("enter"):
-				if Ldir[y] == "../" {
+				if dir[y] == "../" {
+					ReportLine(dir[y])
 					//TODO: up dir
-				} else if fopen(folder+Ldir[y]) {
+				} else if fopen(folder+dir[y]) {
 					return true
 				}
 				HideCursor()
@@ -592,30 +598,29 @@ func RemoveIndex ( s []string, i int ) ( []string ) {
 	return s
 }
 
+// 'ret' so *dir isn't changed
 //Show [Hidden] File/Dir
 //S[H]F, SD
 //Use Colors
 func FilterFolder ( dir []string, SHF, SF, SD, UC bool) ( []string ) {
+	var ret []string
 	for i:=0;i<len(dir);i++ {
 		if dir[i][0] == '.' {
 			if SHF {
+				ret = append(ret, dir[i])
 				if UC {
 					dir[i] = HiddenFileColor+dir[i]
 				}
-			} else {
-				dir = RemoveIndex(dir, i)
-				i--
 			}
 		} else if ( dir[i][len(dir[i])-1] == '/' ) {
 			if SD {
+				ret = append(ret, dir[i])
 				if UC {
 					dir[i] = FolderColor+dir[i]
 				}
-			} else {
-				dir = RemoveIndex(dir, i)
-				i--
 			}
 		} else {
+			ret = append(ret, dir[i])
 			if SF {
 				tint = strings.Index(dir[i], ".")
 				if tint != -1 && len(dir[i]) != 1 {
@@ -634,13 +639,24 @@ func FilterFolder ( dir []string, SHF, SF, SD, UC bool) ( []string ) {
 						dir[i] = txt+dir[i]
 					}
 				}
-			} else {
-				dir = RemoveIndex(dir, i)
-				i--
 			}
 		}
 	}
-	return dir
+	ret = RemoveDuplicate(ret)
+	return ret
+}
+
+//testing generics
+func RemoveDuplicate[T string](sliceList []T) []T {
+	AllKeys := make(map[T]bool)
+	list := []T{}
+	for _, item := range sliceList {
+		if _, ok := AllKeys[item]; !ok {
+			AllKeys[item] = true
+			list = append(list, item)
+		}
+	}
+	return list
 }
 
 //HTTP?
