@@ -1,6 +1,9 @@
 # name:(f)r,g,b,(b)r,g,b
 # name:(f)r,g,b
 # name:name
+#TODO: update naming
+# from.what
+# from.category.status
 
 # simple colors
 red:255,0,0
@@ -45,3 +48,8 @@ HiddenFileColor:90,90,90
 .py:255,255,0
 .zip:200,20,250
 .go:180,200,255
+
+#GS
+GS.git.OK:60,255,60
+GS.git.ToUpload:60,60,255
+GS.git.ToUpdate:255,60,60
