@@ -32,7 +32,7 @@ func debug () () {
 	// add FileColors?
 	i=0
 	for key, val := range colors {
-		wprint(Win, i, 0, spf("%s:%spog████   %s", key, val, colors["nc"]))
+		wprint(Win, i, 0, spf("%s:%spog████		%s", key, val, colors["nc"]))
 		i++
 	}
 	wgtk(Win)
@@ -65,6 +65,12 @@ func InterpretColorLine ( line string ) ( string, string ) {
 	}
 	line = strings.Replace(line, " ", "", -1)
 	var ll = strings.Split(line, ":")
+	if len(ll) == 1 {
+		// can't use config colors lol
+		wuprint(Win, 0, 0, RGB(255,0,0)+"invalid color line"+RGB(255,255,255))
+		wuprint(Win, 1, 0, "\""+line+"\"")
+		exit(1)
+	}
 	var name = ""
 	var code = ""
 	name = ll[0]
