@@ -124,6 +124,7 @@ func LoadColors ( f string ) ( ) {
 
 const (
 	T_bool = iota
+	T_string = iota
 	T_int = iota
 )
 
@@ -142,4 +143,8 @@ func ReadCFG (name string, T int) (interface{}) {
 
 func RCfgB(name string) (bool) {
 	return ReadCFG(name, T_bool).(bool)
+}
+
+func RCfgS(name string) (string) {
+	return ReadCFG(name, T_string).(string)
 }
