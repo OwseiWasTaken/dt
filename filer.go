@@ -1,6 +1,12 @@
 // file://home/ow/
 // https://google.com
 
+//TODO: Reader/Filer instance
+// pack [reader/filer] vars into struct
+// init -> run(instance)
+// easier to do diferent tabs
+// (maybe a window for each, so i can make split winds)
+
 //TODO: G error
 //enter file://file
 //press 'G'
@@ -396,9 +402,22 @@ func Reader (c []string, filename string) (bool) {
 					x--
 					tint=x
 				}
-			case "a", "i":
+			case "a", "i", "o":
 				if k == "a" {
 					x++
+				}
+				if k == "o" {
+					c = append(c[:y+w+1], c[y+w:]...)
+					c[y+w+1] = ""
+					cl++
+					off = cl-Few.LenY-1
+					if y < Few.LenY-1 {
+						y++
+					} else {
+						w++
+					}
+					tint = 0
+					x = 0
 				}
 				if x > len(c[w+y]) {
 					x = len(c[w+y])
@@ -429,14 +448,42 @@ func Reader (c []string, filename string) (bool) {
 						continue
 					}
 					switch k {
+						case ("enter"):
+							tstring = c[y+w][x:]
+							c = append(c[:y+w+1], c[y+w:]...)
+							c[1+y+w] = tstring
+							c[y+w] = c[y+w][:x]
+							cl++
+							off = cl-Few.LenY-1
+							if y < Few.LenY-1 {
+								y++
+							} else {
+								w++
+							}
+							tint = 0
+							x = 0
+						case ("backspace"):
+							if x == 0 {
+								if y+w != 0 {
+									if y != 0 {
+										y--
+									} else {
+										w--
+									}
+									x = len(c[y+w])
+									c[y+w] = c[y+w]+c[y+w+1]
+									c = RemoveIndex(c, y+w+1)
+									cl--
+								}
+							} else {
+								if len(c[y+w])!=0 {
+									c[y+w] = c[y+w][:x-1]+c[y+w][x:]
+									x--
+								}
+							}
 						case ("space"):
 							c[y+w] = c[y+w][:x]+" "+c[y+w][x:]
 							x++
-						case ("backspace"):
-							if len(c[y+w])!=0 {
-								c[y+w] = c[y+w][:x-1]+c[y+w][x:]
-								x--
-							}
 						case ("left"):
 							if x != 0 {
 								x--
@@ -596,15 +643,6 @@ func Folder ( folder string ) (bool) {
 	return false
 }
 
-func RemoveIndex ( s []string, i int ) ( []string ) {
-	if len(s) <= i+2 {
-		s = s[:i]
-	} else {
-		s = append(s[:i], s[i+2:]...)
-	}
-	return s
-}
-
 // 'ret' so *dir isn't changed
 //Show [Hidden] File/Dir
 //S[H]F, SD
@@ -665,6 +703,12 @@ func RemoveDuplicate[T string](sliceList []T) []T {
 	}
 	return list
 }
+
+func RemoveIndex[T string | int] ( s []T, i int ) ( []T ) {
+	s = append(s[:i], s[i+1:]...)
+	return s
+}
+
 
 //HTTP?
 // https links
