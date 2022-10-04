@@ -7,16 +7,21 @@ include "filer"
 include "abspath"
 include "gs"
 
-func main(){
-	// init screen
-	InitTermin()
-
+func InitSec() {
 	// init cfg file
 	InitVars()
 
 	// load cfg
 	InitAirLine()
 	InitFiler()
+	InitGs()
+}
+
+func main(){
+	// init screen
+	InitTermin()
+	// init internal-systems (+ colors)
+	InitSec()
 
 
 	// set cursor type
