@@ -35,15 +35,13 @@ func fload (f string) ([]string) {
 //true:quit
 func fopen (f string) (bool) {
 	// try to read as dir
-	_, err := ioutil.ReadDir(f)
-	if err == nil {
+	_, err := ioutil.ReadDir(f[6:])
+	if err == nil && f[len(f)-1] == '/' {
 		return Folder(f)
 	} else {
 		return Reader(fload(f), f[6:])
 	}
 }
-
-//READER
 
 //init vars
 var (
@@ -78,25 +76,20 @@ func InitFiler() {
 	Few = MakeWin(
 		"Filer/Editor Window",
 		stdout, stdin,
-		0, Win.LenY-3,
+		0, Win.LenY-Alw.LenY,
 		0, Win.LenX,
 	)
 }
 
 func ShortenName (f string) (string) {
-	var r = "/"
-	var index int
-	var gone int // chars already gone over
-	for {
-		index = strings.Index(f[gone:], "/")
-		gone+=index+1
-		if strings.Index(f[gone:], "/") == -1 {
-			r+=f[gone:]
-			break
-		}
-		r+=string(f[gone:gone+index+1][0])+"/"
+	var out = ""
+	var in = strings.Split(f, "/")
+	// exclude 1° (''/) and last (filename)
+	for i:=1;i<len(in)-1;i++{
+		out+="/"+string(in[i][0])
 	}
-	return r
+	out += "/"+in[len(in)-1]
+	return out
 }
 
 func MakeAirLine (s string) {
@@ -168,24 +161,24 @@ func Reader (c []string, filename string) (bool) {
 	ShowCursor()
 	wuprint(Few, 0, 0, "\033[2 q") // block
 	var (
-		// loop
-		k string
-		i int
 
 		cmd string
 		args []string
 		shortname string
+		// loop
+		k string
+		i = 0
 		// read
 		cl = len(c)
 		off = cl-Few.LenY-1
-		//ll []int
 
 		y = 0
 		x = 0
 		w = 0//window shift
+		//TODO: maybe make w+y var
 	)
 
-	shortname = ShortenName(filename[6:])
+	shortname = ShortenName(filename)
 
 	for i:=0;i<len(c);i++ {
 		c[i] = untab(c[i])
@@ -201,7 +194,7 @@ func Reader (c []string, filename string) (bool) {
 	// clear temps
 	tint = 0
 
-	for k!="q" {
+	for {
 		// clear;draw text
 		for i=0;(i+w)<cl&&(i<Few.LenY);i++{
 			wprint(Few, i, 0, "\033[2K"+bkgrey)
@@ -218,11 +211,11 @@ func Reader (c []string, filename string) (bool) {
 		// use k
 		switch (k) {
 			case ("w"):
-				tint = strings.Index(c[w+y], " ")
+				//TODO: jump to next line
+				tint = strings.Index(c[w+y][x+1:], " ")+x+1
 				if tint > 0 {
 					x = tint
 				}
-				//TODO: jump to next line
 			case (":"):
 				// change cursor type
 				print("\033[6 q") // I-beam
@@ -253,7 +246,7 @@ func Reader (c []string, filename string) (bool) {
 
 				args = strings.Split(tstring, " ")
 				if len(args) == 0 {
-					Warn(2)// Empty
+					Warn(E_Empty_Command)// Empty
 				}
 
 				if len(args) > 1 {
@@ -275,7 +268,8 @@ func Reader (c []string, filename string) (bool) {
 							filename = "file://"+args[0]
 							_, terror = os.OpenFile(args[0], os.O_CREATE|os.O_WRONLY, 0644)
 							if terror != nil {
-								AdvWarn(5, spf("%v", terror))
+								AdvWarn(E_Cant_Create_File,
+								spf("%v", terror))
 							}
 						}
 						terror = os.WriteFile(
@@ -285,7 +279,8 @@ func Reader (c []string, filename string) (bool) {
 							//TODO: change file 0otype
 						)
 						if !exists(args[0]) {
-							AdvWarn(4, filename + spf("%v", terror), "d")
+							AdvWarn(E_Cant_Write_To_File,
+							filename + spf("%v", terror), "d")
 						}
 					case (":q"):
 						clear()
@@ -299,7 +294,7 @@ func Reader (c []string, filename string) (bool) {
 						return true
 					default:
 						// overwrite report with error
-						AdvWarn(3, tstring)
+						AdvWarn(E_No_Such_Command, tstring)
 						//ReportLine(ErrorText[3]+" '"+tstring+"'"+txt)
 				tstring = ""
 				}
@@ -323,7 +318,7 @@ func Reader (c []string, filename string) (bool) {
 							return true
 						}
 				} else {
-					Warn(1) // warn: no file from link
+					Warn(E_Invalid_Link) // warn: no file from link
 				}
 			case ("g"):
 				w = 0
@@ -337,9 +332,25 @@ func Reader (c []string, filename string) (bool) {
 				}
 				x = 0
 				tint = 0
+			case ("c"):
+				if w > 0 {
+					if Few.LenY-2 >= y {
+						y++
+					}
+					w--
+				}
+				if x >= len(c[w+y]) {
+					x = len(c[w+y])
+				}
 			case ("z"):
 				if off > w {
+					if y > 0 {
+						y--
+					}
 					w++
+				}
+				if x >= len(c[w+y]) {
+					x = len(c[w+y])
 				}
 			case ("x"):
 				if len(c[y+w])!=0 {
@@ -347,10 +358,6 @@ func Reader (c []string, filename string) (bool) {
 				}
 				if len(c[y+w]) < x {
 					x--
-				}
-			case ("c"):
-				if w > 0 {
-					w--
 				}
 			case ("j"):
 				if y < Few.LenY-1 && (y+w+1) < cl {
@@ -516,21 +523,21 @@ func Folder ( folder string ) (bool) {
 		mark string
 	)
 	//fl = append(fl, "../")
-	mark = colors["red"]+"*"+colors["white"]
+	mark = colors["Folder.Mark"]+"*"+colors["Text"]
 
 	git = GetGs(folder[6:])
 	ShowHiddenFiles = RCfgB("ShowHiddenFiles")
 	ShowFiles = RCfgB("ShowFiles")
 	ShowDirs = RCfgB("ShowDirs")
 
-	dir = FilterFolder(fl,
+	Cdir = FilterFolder(fl,
 		ShowHiddenFiles, ShowFiles, ShowDirs, false,
 	)
 
 	//fuck it, no colors
 	// i'll do that shit later
-	Cdir = FilterFolder(fl,
-		ShowHiddenFiles, ShowFiles, ShowDirs, false,
+	dir = FilterFolder(Cdir,
+		ShowHiddenFiles, ShowFiles, ShowDirs, true,
 	)
 
 	ld = len(dir)
