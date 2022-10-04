@@ -18,6 +18,19 @@ var (
 	Alw *Window
 )
 
+const (
+	// errs
+	E_unused = iota
+	E_Invalid_Link = iota
+	E_Empty_Command = iota
+	E_No_Such_Command = iota
+	E_Cant_Write_To_File = iota
+	E_Cant_Create_File= iota
+	// err len
+	E_ = iota
+)
+
+
 func InitAirLine () {
 	// define colors
 	airline = colors["AirLine"]
@@ -34,7 +47,7 @@ func InitAirLine () {
 	ErrorText = []string{
 		"UNUSED ERROR",
 		SimpleError+"Invalid Link",
-		SimpleError+"Command Empty",
+		SimpleError+"Empty Command",
 		BadError+"No Such Command \"%s\"",
 		BadError+"Can't Write To File %s: %s",
 		BadError+"Can't Create File %s",
