@@ -129,7 +129,11 @@ const (
 )
 
 func ReadCFG (name string, T int) (interface{}) {
-	s := cfg[name]
+	var (
+		s = cfg[name]
+		te error
+		ti int
+	)
 	switch (T) {
 		case (T_bool):
 			if s == "false" || s == "true" {
@@ -137,6 +141,15 @@ func ReadCFG (name string, T int) (interface{}) {
 			} else {
 				//TODO: break
 			}
+		case (T_string):
+			return s
+		case (T_int):
+			ti, te = strconv.Atoi(s)
+			if te != nil {
+				clear()
+				panic(te)
+			}
+			return ti
 	}
 	return nil
 }
@@ -147,4 +160,8 @@ func RCfgB(name string) (bool) {
 
 func RCfgS(name string) (string) {
 	return ReadCFG(name, T_string).(string)
+}
+
+func RCfgI(name string) (int) {
+	return ReadCFG(name, T_int).(int)
 }
