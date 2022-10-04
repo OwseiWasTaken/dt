@@ -65,13 +65,13 @@ var (
 func InitFiler() {
 	// define colors
 	bkgrey = colors["bkgrey"]
-	FileColor = colors["FileColor"]
-	FolderColor = colors["FolderColor"]
-	HiddenFileColor = colors["HiddenFileColor"]
+	FileColor = colors["Folder.FileColor"]
+	FolderColor = colors["Folder.FolderColor"]
+	HiddenFileColor = colors["Folder.HiddenFileColor"]
 	ModeText = [...]string{
-		colors["NormalMode"]+" NORMAL "+AirLineText+" ",
-		colors["InsertMode"]+" INSERT "+AirLineText+" ",
-		colors["NewTree"]+" NEWTREE "+AirLineText+" ",
+		colors["Modes.Normal"]+" NORMAL "+AirLineText+" ",
+		colors["Modes.Insert"]+" INSERT "+AirLineText+" ",
+		colors["Modes.NewTree"]+" NEWTREE "+AirLineText+" ",
 	}
 	Few = MakeWin(
 		"Filer/Editor Window",
@@ -114,7 +114,7 @@ func WriterAirLine (filename, k string, y, x, tint int) {
 	MakeAirLine( spf(
 		"%s%s@%s%d:%d::%d %s%s",
 		bk, filename,
-		airline, y+1, x, tint,
+		AirLineText, y+1, x, tint,
 		k,
 		txt,
 	))
@@ -264,8 +264,8 @@ func Reader (c []string, filename string) (bool) {
 						//save
 						// retab
 						if len(args) == 1 {
+							filename = args[0]
 							shortname = ShortenName(args[0])
-							filename = "file://"+args[0]
 							_, terror = os.OpenFile(args[0], os.O_CREATE|os.O_WRONLY, 0644)
 							if terror != nil {
 								AdvWarn(E_Cant_Create_File,
@@ -278,7 +278,7 @@ func Reader (c []string, filename string) (bool) {
 							0644,
 							//TODO: change file 0otype
 						)
-						if !exists(args[0]) {
+						if !exists(filename) {
 							AdvWarn(E_Cant_Write_To_File,
 							filename + spf("%v", terror), "d")
 						}

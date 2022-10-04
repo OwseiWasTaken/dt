@@ -3,15 +3,14 @@
 
 
 var (
-	airline string
 	AirLineText string
+	airline string
 	BadError string
 	SimpleError string
 	slap string
 	cleanslap string
 	bk string
 	txt string
-	airlinetxt string
 
 	ErrorText []string
 
@@ -33,13 +32,12 @@ const (
 
 func InitAirLine () {
 	// define colors
-	airline = colors["AirLine"]
-	BadError = colors["BadError"]
-	SimpleError = colors["SimpleError"]
+	BadError = colors["ReportLine.BadError"]
+	SimpleError = colors["ReportLine.SimpleError"]
 	txt = colors["TextBkGrey"]
-	AirLineText = colors["AirLineText"]
-	bk = colors["AirLineText"]
-	slap = bk+sws+txt
+	AirLineText = colors["AirLine.Text"]
+	bk = colors["AirLine.Bk"]
+	slap = AirLineText+sws+txt
 	cleanslap = txt+sws
 
 	// define errors

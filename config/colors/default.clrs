@@ -17,30 +17,32 @@ nc:255,255,255,0,0,0
 # background
 bkgrey:240,240,240,27,27,27
 FlAirLineColor:160,160,160,34,34,34
+Text:240,240,240
 
 # Colors
-Text:240,240,240
 TextBkGrey:240,240,240,27,27,27
-AirLineText:140,140,140,54,54,54
+AirLine.Text:140,140,140,54,54,54
+#TODO: make "bk work
+AirLine.BK:0,0,0,54,54,54
 
 # Reader
 
-NormalMode:205,205,205,90,90,90
-InsertMode:205,205,205,180,40,180
-NewTree:30,30,0,145,145,145
+Modes.Normal:205,205,205,90,90,90
+Modes.Insert:205,205,205,180,40,180
+Modes.NewTree:30,30,0,145,145,145
 
-AirLine:0,0,0,110,110,110
 
-BadError:215,215,215,255,0,0
-SimpleError:015,015,015,255,255,50
+
+ReportLine.BadError:215,215,215,255,0,0
+ReportLine.SimpleError:015,015,015,255,255,50
 
 # Folder
 Folder.Mark:255,0,0
 
 # no .X & dir
-FileColor:130,130,130
-FolderColor:105,105,200
-HiddenFileColor:90,90,90
+Folder.FileColor:130,130,130
+Folder.FolderColor:105,105,200
+Folder.HiddenFileColor:90,90,90
 
 # green: 165,205,0
 
