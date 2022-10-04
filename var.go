@@ -139,7 +139,9 @@ func ReadCFG (name string, T int) (interface{}) {
 			if s == "false" || s == "true" {
 				return s == "true"
 			} else {
-				//TODO: break
+				panic(
+					errors.New(spf("can't \"%s\" convert to bool", s)),
+				)
 			}
 		case (T_string):
 			return s
