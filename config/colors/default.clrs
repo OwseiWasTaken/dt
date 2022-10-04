@@ -35,6 +35,7 @@ BadError:215,215,215,255,0,0
 SimpleError:015,015,015,255,255,50
 
 # Folder
+Folder.Mark:255,0,0
 
 # no .X & dir
 FileColor:130,130,130
