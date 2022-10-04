@@ -122,15 +122,6 @@ func LoadColors ( f string ) ( ) {
 	}
 }
 
-//TODO: TerminError
-//TODO: save/make cfg files
-func save(cfg map[string]string) (bool) {
-	return true
-}
-
-func MakeDefaultFiles () {
-}
-
 const (
 	T_bool = iota
 	T_int = iota
