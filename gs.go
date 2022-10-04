@@ -48,7 +48,6 @@ func InitGs () {
 }
 
 func GetGs ( dir string ) (string) {
-	//TODO(3) colors for gs: make gs use cfg/colors
 	var (
 		GSOut string
 		branch string
