@@ -12,6 +12,27 @@
 //press 'G'
 //crash?
 
+type Buffer interface {
+	Run() bool
+	Resize(int, int, int, int)
+}
+
+type R_Buffer struct {
+	// since window is addr, rename it's var when runnning
+	win *Window
+	filename string
+	ShortName string
+	file []string // content
+	buff []string
+	clen int // len of content
+	MaxOff int // max w value
+	//TODO: make coors into uint
+	y int
+	x int
+	w int
+	yw int // y+w
+}
+
 // file links
 func fvalid (f string) (bool) {
 	return strings.Index(f, "file:/")==0
@@ -45,9 +66,20 @@ func fopen (f string) (bool) {
 	if err == nil && f[len(f)-1] == '/' {
 		return Folder(f)
 	} else {
-		return Reader(fload(f), f[6:])
+		r := MakeReader(Few, fload(f), f)
+		return r.Run()
+		//return Reader(fload(f), f[6:])
 	}
 }
+
+func ClearAll () () {
+	for i:=Few.MinY;i<Few.MaxY;i++{
+		wprint(Few, i, Few.MinY, "\033[2K")
+	}
+	ClearAllAirLine()
+	ReportLine(bkgrey+sws)
+}
+
 
 //init vars
 var (
@@ -79,12 +111,12 @@ func InitFiler() {
 		colors["Modes.Insert"]+" INSERT "+AirLineText+" ",
 		colors["Modes.NewTree"]+" NEWTREE "+AirLineText+" ",
 	}
-	Few = MakeWin(
-		"Filer/Editor Window",
-		stdout, stdin,
-		0, Win.LenY-Alw.LenY,
-		0, Win.LenX,
-	)
+	//Few = MakeWin(
+	//	"Filer/Editor Window",
+	//	stdout, stdin,
+	//	0, Win.LenY-Alw.LenY,
+	//	0, Win.LenX,
+	//)
 }
 
 func ShortenName (f string) (string) {
@@ -126,21 +158,6 @@ func WriterAirLine (filename, k string, y, x, tint int) {
 	))
 }
 
-func FolderAirLine ( dir string, git string ) () {
-	MakeAirLine( spf(
-		"%s %s %s%s",
-		AirLineText, dir, git, txt,
-	))
-}
-
-func ClearAll () () {
-	for i:=0;i<Few.MaxY;i++{
-		wprint(Few, i, 0, "\033[2K")
-	}
-	ClearAllAirLine()
-	ReportLine(bkgrey+sws)
-}
-
 func l( s string ) ( int ) {
 	x:=len(s)
 	if x == 0 {
@@ -160,36 +177,66 @@ func untab ( l string ) ( string ) {
 	return strings.Replace(l, "\t", " "+" ", 1)
 }
 
-func Reader (c []string, filename string) (bool) {
+// should different instances of Buffer have their own instance of ALW?
+func MakeReader (win *Window, c []string, filename string) (R_Buffer) {
+	ClearAllAirLine()
+	for i:=0;i<len(c);i++ {
+		c[i] = untab(c[i])
+	}
+	return R_Buffer{
+		win,
+		filename, ShortenName(filename),
+		c, []string{}, len(c),
+		Few.MinY,0,0,0,
+		1,
+	}
+}
+
+func (b R_Buffer) Resize (MinY, MaxY, MinX, MaxX int) {
+	b.win.MinY = MinY
+	b.win.MinX = MinX
+	b.win.MaxY = MaxY
+	b.win.MaxX = MaxX
+}
+
+func (b R_Buffer) Run () (bool) {
+	b, e := Reader(
+		b,
+		b.win,
+		b.filename, b.ShortName,
+		b.file, b.buff,
+		b.y, b.x, b.w,
+	)
+	clear()
+	PS(b)
+	wgtk(Win)
+	b, e = Reader(
+		b,
+		b.win,
+		b.filename, b.ShortName,
+		b.file, b.buff,
+		b.y, b.x, b.w,
+	)
+	return e
+}
+
+//TODO: check for mode each loop?
+//-> no nested swtich
+func Reader ( This R_Buffer, Few *Window, filename, ShortName string, c, buff []string, y, x, w int) (R_Buffer, bool) {
 	// normal mode
-	mode = 0
 	// set cursor type
 	ShowCursor()
 	wuprint(Few, 0, 0, "\033[2 q") // block
 	var (
-
-		cmd string
-		args []string
-		shortname string
-		// loop
+		// func specific
 		k string
 		i = 0
-		// read
 		cl = len(c)
-		off = cl-Few.LenY-1
-
-		y = 0
-		x = 0
-		w = 0//window shift
-		//TODO: maybe make w+y var
+		off int// max w
+		//TODO: make w+y var work
+		//yw = 0
 	)
-
-	shortname = ShortenName(filename)
-
-	for i:=0;i<len(c);i++ {
-		c[i] = untab(c[i])
-	}
-
+	off = len(c)-Few.LenY-1
 	if off < 0 {
 		off = 0
 	}
@@ -202,13 +249,13 @@ func Reader (c []string, filename string) (bool) {
 
 	for {
 		// clear;draw text
-		for i=0;(i+w)<cl&&(i<Few.LenY);i++{
+		for i=Few.MinY;(i+w)<cl&&(i<Few.MaxY);i++{
 			wprint(Few, i, 0, "\033[2K"+bkgrey)
 			wprint(Few, i, 0, c[i+w])
 		}
 
 		// print airline
-		ReaderAirLine(shortname, k, y+w, x)
+		ReaderAirLine(ShortName, k, y+w, x)
 
 		// move cursor;get k
 		wmove(Few, y, x)
@@ -235,6 +282,7 @@ func Reader (c []string, filename string) (bool) {
 						tstring += k
 					} else if k == "backspace" && len(tstring) != 0 {
 						tstring = tstring[:len(tstring)-1]
+						ReportLine(tstring+" ")
 					} else if k == "space" {
 						tstring += " "
 					} else if k == "enter" {
@@ -250,29 +298,29 @@ func Reader (c []string, filename string) (bool) {
 					break
 				}
 
-				args = strings.Split(tstring, " ")
-				if len(args) == 0 {
+				buff = strings.Split(tstring, " ")
+				if len(buff) == 0 {
 					Warn(E_Empty_Command)// Empty
 				}
 
-				if len(args) > 1 {
-					cmd = args[0]
-					args = args[1:]
+				if len(buff) > 1 {
+					k = buff[0]
+					buff = buff[1:]
 				} else {
-					cmd = args[0]
-					args = []string{}
+					k = buff[0]
+					buff = []string{}
 				}
 
 				// report command
 				ReportLine(tstring)
-				switch cmd {
+				switch k {
 					case (":w"):
 						//save
 						// retab
-						if len(args) == 1 {
-							filename = args[0]
-							shortname = ShortenName(args[0])
-							_, terror = os.OpenFile(args[0], os.O_CREATE|os.O_WRONLY, 0644)
+						if len(buff) == 1 {
+							filename = buff[0]
+							ShortName = ShortenName(buff[0])
+							_, terror = os.OpenFile(buff[0], os.O_CREATE|os.O_WRONLY, 0644)
 							if terror != nil {
 								AdvWarn(E_Cant_Create_File,
 								spf("%v", terror))
@@ -292,12 +340,25 @@ func Reader (c []string, filename string) (bool) {
 						clear()
 						// reset cursor type
 						print("\033[1 q") // blink block
-						return true
+						This.y = y
+						This.w = w
+						This.x = x
+						This.file = c
+						This.clen = len(c)
+						This.MaxOff = off
+						return This, true
 					case (":wq"):
 						clear()
 						print("\033[1 q")
 						WriteFile(filename, retab(strings.Join(c, "\n")))
-						return true
+						This.y = y
+						This.w = w
+						This.x = x
+						This.file = c
+						This.clen = len(c)
+						This.MaxOff = off
+						This.ShortName = ShortName
+						return This, true
 					default:
 						// overwrite report with error
 						AdvWarn(E_No_Such_Command, tstring)
@@ -306,7 +367,14 @@ func Reader (c []string, filename string) (bool) {
 				}
 			case "backspace", "^H":
 				ClearAll()
-				return false
+				This.y = y
+				This.w = w
+				This.x = x
+				This.file = c
+				This.clen = len(c)
+				This.MaxOff = off
+				This.ShortName = ShortName
+				return This, false
 			case ("space"):
 				ClearAllAirLine()
 			case ("_"):
@@ -321,7 +389,14 @@ func Reader (c []string, filename string) (bool) {
 				if fcan(tstring) {
 						ClearAll()
 						if (fopen(tstring)) {
-							return true
+							This.y = y
+							This.w = w
+							This.x = x
+							This.file = c
+							This.clen = len(c)
+							This.MaxOff = off
+							This.ShortName = ShortName
+							return This, true
 						}
 				} else {
 					Warn(E_Invalid_Link) // warn: no file from link
@@ -350,7 +425,7 @@ func Reader (c []string, filename string) (bool) {
 				}
 			case ("z"):
 				if off > w {
-					if y > 0 {
+					if y > Few.MinY {
 						y--
 					}
 					w++
@@ -379,7 +454,7 @@ func Reader (c []string, filename string) (bool) {
 					}
 				}
 			case ("k"):
-				if y > 0 {
+				if y > Few.MinY {
 					y--
 					x = tint
 					if l(c[y+w]) < x {
@@ -411,6 +486,9 @@ func Reader (c []string, filename string) (bool) {
 					c[y+w+1] = ""
 					cl++
 					off = cl-Few.LenY-1
+					if off < 0 {
+						off = 0
+					}
 					if y < Few.LenY-1 {
 						y++
 					} else {
@@ -430,7 +508,7 @@ func Reader (c []string, filename string) (bool) {
 				print("\033[6 q") // I-beam
 				for k!="esc" {
 					// clear;draw text
-					for i=0;(i+w)<cl&&(i<Few.LenY);i++{
+					for i=Few.MinY;(i+w)<cl&&(i<Few.LenY);i++{
 						wprint(Few, i, 0, "\033[2K")
 						wprint(Few, i, 0, c[i+w])
 					}
@@ -455,6 +533,9 @@ func Reader (c []string, filename string) (bool) {
 							c[y+w] = c[y+w][:x]
 							cl++
 							off = cl-Few.LenY-1
+							if off < 0 {
+								off = 0
+							}
 							if y < Few.LenY-1 {
 								y++
 							} else {
@@ -464,8 +545,8 @@ func Reader (c []string, filename string) (bool) {
 							x = 0
 						case ("backspace"):
 							if x == 0 {
-								if y+w != 0 {
-									if y != 0 {
+								if y+w != Few.MinY {
+									if y != Few.MinY {
 										y--
 									} else {
 										w--
@@ -511,7 +592,7 @@ func Reader (c []string, filename string) (bool) {
 								x = len(c[y+w])
 							}
 						case ("up"):
-							if y == 0 {
+							if y == Few.MinY {
 								if w != 0 {
 									w--
 								}
@@ -543,8 +624,23 @@ func Reader (c []string, filename string) (bool) {
 	clear()
 	// reset cursor type
 	print("\033[1 q") // blink block
-	return true
+	This.y = y
+	This.w = w
+	This.x = x
+	This.file = c
+	This.clen = len(c)
+	This.MaxOff = off
+	This.ShortName = ShortName
+	return This, true
 }
+
+func FolderAirLine ( dir string, git string ) () {
+	MakeAirLine( spf(
+		"%s %s %s%s",
+		AirLineText, dir, git, txt,
+	))
+}
+
 
 // Reader out doesn't matter (when Folder().Reader())
 //FOLDER
@@ -558,7 +654,6 @@ func Folder ( folder string ) (bool) {
 	var (
 		dir []string
 		Cdir []string
-		fl = flist(folder)
 		git string
 		ShowHiddenFiles bool
 		ShowFiles bool
@@ -566,10 +661,9 @@ func Folder ( folder string ) (bool) {
 		k string
 		ld int
 		i int
-		y = 0
+		y = Few.MinY
 		mark string
 	)
-	//fl = append(fl, "../")
 	mark = colors["Folder.Mark"]+"*"+colors["Text"]
 
 	git = GetGs(folder[6:])
@@ -577,12 +671,10 @@ func Folder ( folder string ) (bool) {
 	ShowFiles = RCfgB("ShowFiles")
 	ShowDirs = RCfgB("ShowDirs")
 
-	Cdir = FilterFolder(fl,
+	Cdir = FilterFolder(flist(folder),
 		ShowHiddenFiles, ShowFiles, ShowDirs, false,
 	)
 
-	//fuck it, no colors
-	// i'll do that shit later
 	dir = FilterFolder(Cdir,
 		ShowHiddenFiles, ShowFiles, ShowDirs, true,
 	)
@@ -604,7 +696,7 @@ func Folder ( folder string ) (bool) {
 
 	for k!="backspace"&&k!="^H"{
 		FolderAirLine(folder, git)
-		for i=0;i<ld;i++ {
+		for i=Few.MinY;i<ld;i++ {
 			if i < ld {
 				wprint(Few, i, 0, "\033[2K")
 				if i == y {
