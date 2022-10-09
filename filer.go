@@ -1,12 +1,6 @@
 // file://home/ow/
 // https://google.com
 
-//TODO: Reader/Filer instance
-// pack [reader/filer] vars into struct
-// init -> run(instance)
-// easier to do diferent tabs
-// (maybe a window for each, so i can make split winds)
-
 //TODO: G error
 //enter file://file
 //press 'G'
@@ -216,6 +210,8 @@ func Reader (c []string, filename string) (bool) {
 
 		// use k
 		switch (k) {
+			case ("NULL"):
+				//TODO: no such key
 			case ("w"):
 				//TODO: jump to next line
 				tint = strings.Index(c[w+y][x+1:], " ")+x+1
@@ -448,6 +444,8 @@ func Reader (c []string, filename string) (bool) {
 						continue
 					}
 					switch k {
+						case ("NULL"):
+							//TODO: no such key
 						case ("enter"):
 							tstring = c[y+w][x:]
 							c = append(c[:y+w+1], c[y+w:]...)
@@ -546,7 +544,7 @@ func Reader (c []string, filename string) (bool) {
 	return true
 }
 
-// Reader out doesn't matter (when Folder().Reader())
+//TODO: wrap or shift when dir > win.LenY
 //FOLDER
 func Folder ( folder string ) (bool) {
 	// dir mode
@@ -569,7 +567,7 @@ func Folder ( folder string ) (bool) {
 		y = 0
 		mark string
 	)
-	//fl = append(fl, "../")
+	fl = append(fl, "../")
 	mark = colors["Folder.Mark"]+"*"+colors["Text"]
 
 	git = GetGs(folder[6:])
@@ -581,8 +579,6 @@ func Folder ( folder string ) (bool) {
 		ShowHiddenFiles, ShowFiles, ShowDirs, false,
 	)
 
-	//fuck it, no colors
-	// i'll do that shit later
 	dir = FilterFolder(Cdir,
 		ShowHiddenFiles, ShowFiles, ShowDirs, true,
 	)
@@ -625,10 +621,21 @@ func Folder ( folder string ) (bool) {
 				if y != 0 {
 					y--
 				}
+			case ("u"):
+				s := strings.Split(folder, "/")
+				s = s[:len(s)-2]
+				clear()
+				if fopen(strings.Join(s, "/")+"/") {
+					return true
+				}
 			case ("enter"):
 				if dir[y] == "../" {
-					ReportLine(dir[y])
-					//TODO: up dir
+					s := strings.Split(folder, "/")
+					s = s[:len(s)-2]
+					clear()
+					if fopen(strings.Join(s, "/")+"/") {
+						return true
+					}
 				} else if fopen(folder+dir[y]) {
 					return true
 				}
@@ -650,7 +657,7 @@ func Folder ( folder string ) (bool) {
 func FilterFolder ( dir []string, SHF, SF, SD, UC bool) ( []string ) {
 	var ret []string
 	for i:=0;i<len(dir);i++ {
-		if dir[i][0] == '.' {
+		if dir[i][0] == '.' && dir[i] != "../" {
 			if SHF {
 				ret = append(ret, dir[i])
 				if UC {
