@@ -61,11 +61,15 @@ var (
 	HiddenFileColor string
 
 	// temp
+	ShowHiddenFiles bool
+	ShowFiles bool
+	ShowDirs bool
 	tstring string
 	tint int
 	tbool bool
 	terror error
 	Few *Window
+	SaveOnReturn bool
 
 	mode = 0
 )
@@ -77,11 +81,18 @@ func InitFiler() {
 	FileColor = colors["Folder.FileColor"]
 	FolderColor = colors["Folder.FolderColor"]
 	HiddenFileColor = colors["Folder.HiddenFileColor"]
+	//modes
 	ModeText = [...]string{
 		colors["Modes.Normal"]+" NORMAL "+AirLineText+" ",
 		colors["Modes.Insert"]+" INSERT "+AirLineText+" ",
 		colors["Modes.NewTree"]+" NEWTREE "+AirLineText+" ",
 	}
+	// read cfg
+	SaveOnReturn = RCfgB("SaveOnReturn")
+	ShowHiddenFiles = RCfgB("ShowHiddenFiles")
+	ShowFiles = RCfgB("ShowFiles")
+	ShowDirs = RCfgB("ShowDirs")
+	// make window
 	Few = MakeWin(
 		"Filer/Editor Window",
 		stdout, stdin,
@@ -311,6 +322,9 @@ func Reader (c []string, filename string) (bool) {
 				}
 			case "backspace", "^H":
 				ClearAll()
+				if SaveOnReturn {
+					WriteFile(filename, retab(strings.Join(c, "\n")))
+				}
 				return false
 			case ("space"):
 				ClearAllAirLine()
@@ -326,6 +340,9 @@ func Reader (c []string, filename string) (bool) {
 				if fcan(tstring) {
 						ClearAll()
 						if (fopen(tstring)) {
+							if SaveOnReturn {
+								WriteFile(filename, retab(strings.Join(c, "\n")))
+							}
 							return true
 						}
 				} else {
@@ -547,29 +564,23 @@ func Reader (c []string, filename string) (bool) {
 				print("\033[1 q") // block
 		}
 	}
-	clear()
-	// reset cursor type
-	print("\033[1 q") // blink block
-	return true
 }
 
 //TODO: wrap or shift when dir > win.LenY
+//TODO: r[emove] file
 //FOLDER
 func Folder ( folder string ) (bool) {
 	// dir mode
 	mode = 2
 	// set cursor type
 	HideCursor()
-	FolderAirLine(folder, "no git yet")
+	FolderAirLine(folder, "git not loaded yet")
 
 	var (
 		dir []string
 		Cdir []string
 		fl = flist(folder)
 		git string
-		ShowHiddenFiles bool
-		ShowFiles bool
-		ShowDirs bool
 		k string
 		ld int
 		i int
@@ -580,9 +591,6 @@ func Folder ( folder string ) (bool) {
 	mark = colors["Folder.Mark"]+"*"+colors["Text"]
 
 	git = GetGs(folder[6:])
-	ShowHiddenFiles = RCfgB("ShowHiddenFiles")
-	ShowFiles = RCfgB("ShowFiles")
-	ShowDirs = RCfgB("ShowDirs")
 
 	Cdir = FilterFolder(fl,
 		ShowHiddenFiles, ShowFiles, ShowDirs, false,
@@ -607,8 +615,9 @@ func Folder ( folder string ) (bool) {
 		wprint(Few, i, 0, "\033[2K")
 	}
 
+	// only load once (no need to update for now)
+	FolderAirLine(folder, git)
 	for k!="backspace"&&k!="^H"{
-		FolderAirLine(folder, git)
 		for i=0;i<ld;i++ {
 			if i < ld {
 				wprint(Few, i, 0, "\033[2K")
@@ -648,6 +657,9 @@ func Folder ( folder string ) (bool) {
 				} else if fopen(folder+dir[y]) {
 					return true
 				}
+				ClearAirLine()
+				mode = 2
+				FolderAirLine(folder, git)
 				HideCursor()
 			case ("q"):
 				return true
