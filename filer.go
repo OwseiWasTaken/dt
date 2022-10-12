@@ -1,3 +1,7 @@
+import (
+	"os"
+)
+
 // file://home/ow/
 // https://google.com
 
@@ -35,8 +39,13 @@ func fload (f string) ([]string) {
 //true:quit
 func fopen (f string) (bool) {
 	// try to read as dir
-	_, err := ioutil.ReadDir(f[6:])
-	if err == nil && f[len(f)-1] == '/' {
+	clear()
+	fi, err := os.Stat(f[6:])
+	panic(err)
+	if fi.Mode().IsDir() {
+		if f[len(f)-1] != '/' {
+			f+="/"
+		}
 		return Folder(f)
 	} else {
 		return Reader(fload(f), f[6:])
@@ -81,7 +90,7 @@ func InitFiler() {
 	)
 }
 
-func ShortenName (f string) (string) {
+func ShorthenName (f string) (string) {
 	var out = ""
 	var in = strings.Split(f, "/")
 	// exclude 1° (''/) and last (filename)
@@ -178,7 +187,7 @@ func Reader (c []string, filename string) (bool) {
 		//TODO: maybe make w+y var
 	)
 
-	shortname = ShortenName(filename)
+	shortname = ShorthenName(filename)
 
 	for i:=0;i<len(c);i++ {
 		c[i] = untab(c[i])
@@ -267,7 +276,7 @@ func Reader (c []string, filename string) (bool) {
 						// retab
 						if len(args) == 1 {
 							filename = args[0]
-							shortname = ShortenName(args[0])
+							shortname = ShorthenName(args[0])
 							_, terror = os.OpenFile(args[0], os.O_CREATE|os.O_WRONLY, 0644)
 							if terror != nil {
 								AdvWarn(E_Cant_Create_File,
